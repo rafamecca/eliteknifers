@@ -1,10 +1,10 @@
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Trophy } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ListaConfrontos } from "@/components/lista-confrontos";
 import { LogoCla } from "@/components/logo-cla";
 import { UltimosResultados } from "@/components/ultimos-resultados";
-import { garantir, obterRanking, obterTemporadaAtiva, obterUltimosConfrontos } from "@/lib/dados";
+import { garantir, obterRanking, obterTemporadaAtiva, obterTitulosDeTemporada, obterUltimosConfrontos } from "@/lib/dados";
 import { PONTOS_INICIAIS } from "@/lib/elo";
 import { formatarDia } from "@/lib/formato";
 import { criarClienteServidor } from "@/lib/supabase/server";
@@ -34,7 +34,7 @@ export default async function PerfilCla({ params }: PageProps<"/clas/[tag]">) {
   const { supabase, cla } = await buscarCla((await params).tag);
   if (!cla) notFound();
 
-  const [temporada, membros, confrontos] = await Promise.all([
+  const [temporada, membros, confrontos, titulos] = await Promise.all([
     obterTemporadaAtiva(supabase),
     supabase
       .from("membros_cla")
@@ -43,6 +43,7 @@ export default async function PerfilCla({ params }: PageProps<"/clas/[tag]">) {
       .is("saiu_em", null)
       .overrideTypes<{ cargo: Cargo; usuario: { id: string; nick: string } }[], { merge: false }>(),
     obterUltimosConfrontos(supabase, { limite: 20, claId: cla.id }),
+    obterTitulosDeTemporada(supabase, cla.id),
   ]);
 
   const ranking = temporada ? await obterRanking(supabase, temporada.id) : null;
@@ -76,6 +77,21 @@ export default async function PerfilCla({ params }: PageProps<"/clas/[tag]">) {
           )}
         </div>
       </header>
+
+      {titulos.length > 0 && (
+        <ul className="mb-8 flex flex-wrap gap-2">
+          {titulos.map((t) => (
+            <li key={t.id}>
+              <a
+                href={`/ranking?temporada=${t.id}`}
+                className="inline-flex items-center gap-2 rounded-full border border-ouro/50 bg-ouro/10 px-3 py-1.5 text-sm font-semibold text-ouro hover:bg-ouro/20"
+              >
+                <Trophy className="size-4" /> Campeão · {t.nome}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
 
       {cla.bio && <p className="mb-8 whitespace-pre-line text-aco-200">{cla.bio}</p>}
 

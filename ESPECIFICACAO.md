@@ -21,7 +21,7 @@ O site tem ranking por temporada (trimestral) e ranking geral histórico, perfil
 
 ## Modos de jogo
 
-Os clãs combinam entre si qual dos dois modos vão jogar.
+Os clãs combinam entre si qual dos dois modos vão jogar. Confrontos dos dois modos contam no mesmo ranking.
 
 | Modo | Liberado | Proibido |
 | --- | --- | --- |
@@ -148,10 +148,11 @@ Depois, a variação de pontos de A (B recebe o mesmo valor com sinal invertido)
 
 ### Temporadas
 
-- Temporadas trimestrais, criadas e encerradas pelo ADM.
+- Temporadas trimestrais, criadas e encerradas pelo ADM. O ADM encerra a atual e abre a próxima no mesmo passo; só dá para encerrar quando não houver resultado aguardando decisão do ADM naquela temporada.
+- A posição final de cada clã é a do ranking da temporada no momento do encerramento (mesmas regras: mínimo de 3 confrontos e desempate).
 - No reset, cada clã começa a nova temporada com metade da distância que tinha de 1000. Ex.: quem terminou com 1100 começa com 1050; quem terminou com 940 começa com 970.
 - O campeão da temporada ganha um título automático no perfil.
-- O ranking geral histórico usa um segundo Elo que nunca é resetado, com os totais de todas as temporadas.
+- O ranking geral histórico usa um segundo Elo que nunca é resetado, com os totais de todas as temporadas: começa em 1000 e aplica, na ordem de aprovação, todos os confrontos aprovados que valeram pontos.
 
 ### Estatísticas do clã
 
@@ -232,11 +233,11 @@ Construir em quatro fases, cada uma testada com a comunidade antes da próxima. 
    - [ ] Página de ranking com pódio e tabela
    - [ ] Perfil básico do clã com últimos 20 confrontos
 2. **Fase 2 — Competição completa**
-   - [ ] Confirmação e contestação pelo clã adversário, com prazo de 12h
+   - [x] Confirmação e contestação pelo clã adversário, com prazo de 12h
    - [ ] Temporadas trimestrais com reset e ranking geral histórico
    - [ ] Página de comparação clã x clã
    - [ ] Estatísticas completas do clã (sequências, rounds, rivais, pico)
-   - [ ] Página "Como funciona"
+   - [x] Página "Como funciona"
 3. **Fase 3 — Comunidade**
    - [ ] Campeonatos e títulos no perfil
    - [ ] Aviso automático no Discord quando um confronto é aprovado
@@ -260,7 +261,7 @@ Construir em quatro fases, cada uma testada com a comunidade antes da próxima. 
 - [ ] Nome do site e domínio
 - [ ] Logo e cor de destaque
 - [x] Texto das regras do @79 (facas e itens permitidos) para a página "Como funciona" — ver "Modos de jogo"
-- [ ] Confrontos @mix e @79 contam no mesmo ranking? O formulário deve registrar o modo?
+- [x] Confrontos @mix e @79 contam no mesmo ranking? Sim, contam juntos.
 - [ ] Quem serão os ADMs
 - [ ] Datas da primeira temporada
 - [ ] Confirmar os números da pontuação (K = 32, mínimo de 3 partidas, 3 confrontos para aparecer no ranking)

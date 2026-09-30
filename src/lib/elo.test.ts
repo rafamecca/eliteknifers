@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { chanceEsperada, multiplicadorMargem, variacaoElo } from "./elo";
+import { calcularEloGeral, chanceEsperada, multiplicadorMargem, pontosNaNovaTemporada, variacaoElo } from "./elo";
 
 describe("variacaoElo — exemplos da especificação", () => {
   it.each([
@@ -34,5 +34,31 @@ describe("partes da fórmula", () => {
     expect(multiplicadorMargem(5, 0)).toBe(1.5);
     expect(multiplicadorMargem(5, 1)).toBeCloseTo(1.333, 3);
     expect(multiplicadorMargem(3, 2)).toBeCloseTo(1.1, 5);
+  });
+});
+
+describe("pontosNaNovaTemporada", () => {
+  it.each([
+    [1100, 1050],
+    [940, 970],
+    [1000, 1000],
+    [1037, 1019],
+    [963, 982], // 981,5 arredonda como o Postgres
+  ])("%i → %i", (pontos, esperado) => {
+    expect(pontosNaNovaTemporada(pontos)).toBe(esperado);
+  });
+});
+
+describe("calcularEloGeral", () => {
+  it("aplica só o que valeu pontos, em ordem, sem resetar", () => {
+    const pontos = calcularEloGeral([
+      { cla_a_id: "a", cla_b_id: "b", partidas_a: 5, partidas_b: 1, conta_pontos: true },
+      { cla_a_id: "a", cla_b_id: "b", partidas_a: 0, partidas_b: 3, conta_pontos: false },
+      { cla_a_id: "b", cla_b_id: "a", partidas_a: 3, partidas_b: 2, conta_pontos: true },
+    ]);
+    const segundo = variacaoElo(1000 - 21, 1000 + 21, 3, 2);
+    expect(pontos.get("a")).toBe(1021 - segundo);
+    expect(pontos.get("b")).toBe(979 + segundo);
+    expect(pontos.has("c")).toBe(false);
   });
 });

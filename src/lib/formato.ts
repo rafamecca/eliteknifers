@@ -37,3 +37,15 @@ const diaBrasilia = new Intl.DateTimeFormat("en-CA", { timeZone: FUSO, year: "nu
 export function diaEmBrasilia(iso: string): string {
   return diaBrasilia.format(new Date(iso));
 }
+
+/** Hoje no horário de Brasília, "AAAA-MM-DD". */
+export function hojeEmBrasilia(): string {
+  return diaEmBrasilia(new Date().toISOString());
+}
+
+/** Último dia de um período de N meses começando em `dia` (ex.: 2026-10-01 + 3 meses → 2026-12-31). */
+export function fimDoPeriodo(dia: string, meses: number): string {
+  const [a, m, d] = dia.split("-").map(Number);
+  const fim = new Date(Date.UTC(a, m - 1 + meses, d) - 86_400_000);
+  return fim.toISOString().slice(0, 10);
+}

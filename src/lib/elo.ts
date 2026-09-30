@@ -35,3 +35,32 @@ export function variacaoElo(
   const delta = k * multiplicadorMargem(partidasA, partidasB) * (resultado - chanceEsperada(pontosA, pontosB));
   return arredondar(delta) || 0; // evita -0
 }
+
+/** Pontos de largada na temporada seguinte: metade da distância até 1000 (1100 → 1050, 940 → 970).
+ *  Espelha public.pontos_na_nova_temporada. */
+export function pontosNaNovaTemporada(pontos: number): number {
+  return arredondar(PONTOS_INICIAIS + (pontos - PONTOS_INICIAIS) / 2);
+}
+
+export type ConfrontoParaElo = {
+  cla_a_id: string;
+  cla_b_id: string;
+  partidas_a: number;
+  partidas_b: number;
+  conta_pontos: boolean | null;
+};
+
+/** Elo geral histórico: começa em 1000 e aplica, na ordem recebida (ordem de aprovação), todos os
+ *  confrontos que valeram pontos. Nunca reseta entre temporadas. */
+export function calcularEloGeral(confrontos: ConfrontoParaElo[]): Map<string, number> {
+  const pontos = new Map<string, number>();
+  for (const c of confrontos) {
+    if (!c.conta_pontos) continue;
+    const ra = pontos.get(c.cla_a_id) ?? PONTOS_INICIAIS;
+    const rb = pontos.get(c.cla_b_id) ?? PONTOS_INICIAIS;
+    const delta = variacaoElo(ra, rb, c.partidas_a, c.partidas_b);
+    pontos.set(c.cla_a_id, ra + delta);
+    pontos.set(c.cla_b_id, rb - delta);
+  }
+  return pontos;
+}

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { obterRanking, obterTemporadaAtiva } from "@/lib/dados";
 import { redirect } from "next/navigation";
 import { obterSessao } from "@/lib/sessao";
 import { criarClienteServidor } from "@/lib/supabase/server";
@@ -165,4 +166,48 @@ export async function removerMembro(_: EstadoAdmin, formData: FormData): Promise
   if (error) return { erro: error.message };
   revalidatePath("/", "layout");
   return { mensagem: "Membro removido." };
+}
+
+// ---------------------------------------------------------------------------
+// Temporadas
+// ---------------------------------------------------------------------------
+
+const DIA = /^\d{4}-\d{2}-\d{2}$/;
+
+export async function salvarTemporada(_: EstadoAdmin, formData: FormData): Promise<EstadoAdmin> {
+  const { sessao, supabase } = await clienteAdmin();
+  const id = texto(formData, "id");
+  const dados = { nome: texto(formData, "nome"), inicio: texto(formData, "inicio"), fim: texto(formData, "fim") };
+  if (!ehUuid(id)) return { erro: "Temporada inválida." };
+  if (!dados.nome) return { erro: "Dê um nome para a temporada." };
+  if (!DIA.test(dados.inicio) || !DIA.test(dados.fim) || dados.fim < dados.inicio) return { erro: "Datas inválidas." };
+
+  const { error } = await supabase.from("temporadas").update(dados).eq("id", id);
+  if (error) return { erro: error.message };
+  await supabase.from("log_admin").insert({ adm_id: sessao.usuario.id, acao: "editar_temporada", alvo: `temporadas:${id}`, depois: dados });
+  revalidatePath("/", "layout");
+  return { mensagem: "Temporada salva." };
+}
+
+/** Encerra a temporada ativa (posições finais pelo ranking de agora) e abre a próxima com os pontos resetados. */
+export async function abrirNovaTemporada(_: EstadoAdmin, formData: FormData): Promise<EstadoAdmin> {
+  const { supabase } = await clienteAdmin();
+  const nome = texto(formData, "nome");
+  const inicio = texto(formData, "inicio");
+  const fim = texto(formData, "fim");
+  if (!nome) return { erro: "Dê um nome para a nova temporada." };
+  if (!DIA.test(inicio) || !DIA.test(fim) || fim < inicio) return { erro: "Datas inválidas." };
+  if (formData.get("confirmar") !== "on") return { erro: "Marque a confirmação para continuar." };
+
+  const atual = await obterTemporadaAtiva(supabase);
+  const posicoes: Record<string, number> = {};
+  if (atual) {
+    const { classificados } = await obterRanking(supabase, atual.id);
+    for (const l of classificados) if (l.posicao) posicoes[l.cla.id] = l.posicao;
+  }
+
+  const { error } = await supabase.rpc("nova_temporada", { p_nome: nome, p_inicio: inicio, p_fim: fim, p_posicoes: posicoes });
+  if (error) return { erro: error.message };
+  revalidatePath("/", "layout");
+  return { mensagem: atual ? `${atual.nome} encerrada e ${nome} aberta.` : `${nome} aberta.` };
 }

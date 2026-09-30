@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const ABAS = [
   { href: "/admin", rotulo: "Fila de aprovação" },
   { href: "/admin/clas", rotulo: "Clãs" },
+  { href: "/admin/temporadas", rotulo: "Temporadas" },
 ];
 
 export function SubmenuAdmin() {

@@ -23,7 +23,8 @@ resultados com prints, o ADM aprova e o ranking da temporada se atualiza.
 - [ ] Fase 2 — em andamento:
   - [x] Confirmação/contestação pelo adversário (12h a partir do envio), "Minhas pendências",
     ADM mantém/anula/corrige (inclui corrigir placar antes de aprovar).
-  - [ ] Temporadas com reset e ranking geral histórico
+  - [x] Temporadas: ADM encerra e abre a próxima (`nova_temporada`), reset, título de campeão
+    (= `posicao_final` 1), abas do ranking: atual, anteriores, geral histórico
   - [ ] Comparação clã x clã
   - [ ] Estatísticas completas do clã
   - [x] "Como funciona" (regras dos modos em `src/lib/regras.ts`; números da pontuação vêm de `elo.ts`)
@@ -65,7 +66,7 @@ src/lib/tipos.ts       formato das linhas do banco (manter em sincronia com o SQ
 src/lib/supabase/      clientes servidor/navegador e urlPublica()
 src/components/        UI compartilhada (menu, pódio, tabela, lista de confrontos…)
 src/app/               rotas: / · /ranking · /clas · /clas/[tag] · /confrontos/[id] · /enviar · /pendencias · /como-funciona
-                       /entrar · /cadastrar · /auth/confirm · /admin · /admin/clas[/novo|/[id]]
+                       /entrar · /cadastrar · /auth/confirm · /admin · /admin/clas[/novo|/[id]] · /admin/temporadas
 ```
 
 ## Como o banco funciona (importante)
@@ -110,9 +111,12 @@ src/app/               rotas: / · /ranking · /clas · /clas/[tag] · /confront
 - Aproveitamento = (V + E/2) ÷ confrontos. Coluna "Sequência" mostra os últimos 5 resultados.
 - Empate total nos critérios de desempate divide a posição.
 - O e-mail fica só em `auth.users` (não é público); `usuarios` não tem coluna email.
-- Ranking geral histórico (Elo que nunca reseta) fica para a Fase 2, recalculado a partir dos
-  confrontos aprovados; `confrontos` guarda pontos antes/depois para permitir isso.
-- Primeira temporada é criada pela migração (datas a ajustar). Criar/encerrar temporadas é Fase 2.
+- Ranking geral histórico não é gravado: `obterRankingGeral` recalcula o Elo em TS (`calcularEloGeral`)
+  aplicando os confrontos aprovados que valeram pontos, em ordem de `decidido_em`.
+- Encerrar temporada é bloqueado enquanto houver confronto `pendente` nela. As posições finais vêm do
+  ranking calculado pelo site (`obterRanking`) e vão para `nova_temporada`; o título de campeão é
+  `pontos_temporada.posicao_final = 1` (a tabela `titulos` fica para os campeonatos da Fase 3).
+- Consultas que podem passar de 1000 linhas usam `buscarTodos` (paginação) em `src/lib/dados.ts`.
 - Nome do site, cor de destaque e logo ainda estão em "Pendências": nome em `src/lib/config.ts`,
   cores em `src/app/globals.css` (`@theme`).
 
