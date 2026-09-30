@@ -1,0 +1,114 @@
+@AGENTS.md
+
+# Elite Knifers — Ranking de Clãs @79
+
+Site de ranking de ~25 clãs da comunidade Knifer (modo @79 do Point Blank). Líderes enviam
+resultados com prints, o ADM aprova e o ranking da temporada se atualiza.
+
+## Fonte da verdade
+
+- **`ESPECIFICACAO.md` manda.** Regra de negócio nova ou alterada: atualize a especificação
+  primeiro, depois o código. Se o código e a especificação divergirem, pergunte antes de "consertar".
+- Construímos por fases (seção "Fases de construção" da especificação). Não adiante funcionalidades
+  de fases futuras sem pedido — mas a estrutura (tabelas, tipos) já pode nascer preparada.
+- O usuário pede uma parte por vez, testa no navegador e só então segue. Faça commits pequenos,
+  um por parte funcionando.
+
+## Status
+
+- [x] **Fase 1 — Base no ar**: cadastro/login, clãs pelo ADM com líder e sublíder, envio de
+  resultado com prints e rounds, fila de aprovação, Elo na aprovação, ranking com pódio e tabela,
+  perfil do clã com últimos 20 confrontos. (Extras mínimos para navegar: Início, lista de clãs,
+  página do confronto.)
+- [ ] Fase 2 — confirmação/contestação pelo adversário (12h), temporadas com reset e ranking geral
+  histórico, comparação clã x clã, estatísticas completas, "Como funciona".
+- [ ] Fase 3 — campeonatos e títulos, aviso no Discord, líder gerencia o clã, desafios.
+- [ ] Fase 4 — estatísticas e ranking de jogadores.
+
+## Stack e comandos
+
+Next.js 16 (App Router, Turbopack) · React 19 · Tailwind CSS 4 · Supabase (Postgres, Auth,
+Storage) via `@supabase/ssr` · Vitest · deploy na Vercel.
+
+```bash
+npm run dev          # localhost:3000 (precisa de .env.local — ver .env.example)
+npm test             # vitest: src/lib/*.test.ts
+npm run test:sql     # sobe um Postgres descartável e roda supabase/tests/fase1_test.sql
+npm run lint
+npm run typecheck    # rode `npx next typegen` antes se PageProps/LayoutProps não existirem
+npm run build
+```
+
+Antes de commitar: `npm test`, `npm run test:sql` (se mexeu em SQL), `npm run lint`, `npm run typecheck`.
+
+**Next.js 16 é diferente do que você conhece**: `middleware` virou `src/proxy.ts`; `params` e
+`searchParams` são Promises; tipos globais `PageProps<"/rota">`/`LayoutProps`. Na dúvida, leia
+`node_modules/next/dist/docs/`.
+
+## Estrutura
+
+```
+supabase/migrations/   SQL do banco (tabelas, RLS, funções, buckets). Um arquivo novo por mudança.
+supabase/tests/        stub do Supabase + testes SQL (scripts/testar-sql.sh)
+src/proxy.ts           renova a sessão do Supabase a cada requisição
+src/lib/elo.ts         fórmula do Elo (espelho de public.calcular_variacao_elo)
+src/lib/confronto.ts   validação de placar/rounds (espelho de public.enviar_confronto)
+src/lib/ranking.ts     monta a tabela: V/E/D, aproveitamento, saldo, desempate, mínimo de 3 confrontos
+src/lib/dados.ts       consultas compartilhadas (temporada ativa, ranking, últimos confrontos)
+src/lib/sessao.ts      obterSessao(): usuário logado, clã, cargo, ehAdmin, podeEnviar
+src/lib/tipos.ts       formato das linhas do banco (manter em sincronia com o SQL)
+src/lib/supabase/      clientes servidor/navegador e urlPublica()
+src/components/        UI compartilhada (menu, pódio, tabela, lista de confrontos…)
+src/app/               rotas: / · /ranking · /clas · /clas/[tag] · /confrontos/[id] · /enviar
+                       /entrar · /cadastrar · /auth/confirm · /admin · /admin/clas[/novo|/[id]]
+```
+
+## Como o banco funciona (importante)
+
+- **Leitura é pública** (RLS `select using (true)`), exceto `log_admin` (só ADM).
+- **Escritas sensíveis passam por funções `security definer`** que conferem cargo e regras:
+  `enviar_confronto`, `aprovar_confronto`, `rejeitar_confronto`, `definir_lideranca`,
+  `remover_membro`. Nunca abra `insert/update` direto nessas tabelas para usuários comuns.
+  Escritas simples do ADM (clãs, temporadas) usam RLS com `is_admin()`.
+- **O Elo é gravado só pelo banco**, em `aprovar_confronto` (linhas travadas, tudo numa transação,
+  com registro em `log_admin`). `src/lib/elo.ts` existe para prévias na tela e testes. Mudou a
+  fórmula? Mude os dois e os testes dos dois (`elo.test.ts` e `fase1_test.sql`).
+- As validações do formulário (`src/lib/confronto.ts`) são repetidas no SQL; o SQL é quem garante.
+- **Migrações são imutáveis depois de aplicadas**: crie um arquivo novo em `supabase/migrations/`
+  (prefixo de data) em vez de editar um antigo. Rode `npm run test:sql` e acrescente testes em
+  `supabase/tests/`.
+- O cliente Supabase não tem tipos gerados: use `.overrideTypes<Tipo[], { merge: false }>()` /
+  `.maybeSingle<Tipo>()` com os tipos de `src/lib/tipos.ts` e `garantir()` para lançar erros.
+- Prints: bucket público `prints`, caminho `<uid>/<uuid>.webp`, comprimidos no navegador
+  (`src/lib/imagem.ts`, máx. 1920 px) e com SHA-256 do arquivo original em `prints.hash`.
+  Logos: bucket `logos`, pasta `clas/`, 512 px.
+
+## Decisões tomadas onde a especificação deixava em aberto
+
+- Fase 1 não tem confirmação do adversário: o envio fica "Aguardando adversário" e o ADM pode
+  aprovar/rejeitar direto de qualquer status pendente.
+- "Mesmo confronto" (envio duplicado): par de clãs com resultado pendente a até 2h do horário informado.
+- "Primeiro confronto do dia": dia no horário de Brasília; decidido na ordem de aprovação
+  (vale o primeiro aprovado que contou pontos). A fila do ADM é ordenada pela data do confronto.
+- Rounds são obrigatórios; uma partida válida tem um lado com 9 e o outro de 0 a 8. Máx. 15 partidas.
+- Print repetido: bloqueado se o mesmo hash estiver em resultado não rejeitado (reenvio após
+  rejeição pode reusar o print).
+- Aproveitamento = (V + E/2) ÷ confrontos. Coluna "Sequência" mostra os últimos 5 resultados.
+- Empate total nos critérios de desempate divide a posição.
+- O e-mail fica só em `auth.users` (não é público); `usuarios` não tem coluna email.
+- Ranking geral histórico (Elo que nunca reseta) fica para a Fase 2, recalculado a partir dos
+  confrontos aprovados; `confrontos` guarda pontos antes/depois para permitir isso.
+- Primeira temporada é criada pela migração (datas a ajustar). Criar/encerrar temporadas é Fase 2.
+- Nome do site, cor de destaque e logo ainda estão em "Pendências": nome em `src/lib/config.ts`,
+  cores em `src/app/globals.css` (`@theme`).
+
+## Convenções
+
+- Código de domínio, nomes e textos em **português** (pt-BR); termos do glossário da
+  especificação (clã, confronto, partida, round, temporada).
+- **Pensado primeiro para celular**: teste em ~390 px de largura. Tema escuro sempre.
+- Tailwind 4: tokens de cor/fonte em `@theme` e classes próprias (`btn-destaque`, `campo`,
+  `cartao`, `titulo-secao`…) como `@utility` em `globals.css`. Fontes: Oswald (títulos) e Inter.
+- Server Components buscam dados; Client Components só onde há interação. Server Actions ficam
+  em `actions.ts` ao lado da rota e sempre conferem a sessão/cargo antes de agir.
+- Imagens do Supabase usam `<img>` simples (já vêm comprimidas; evita a cota de otimização da Vercel).
