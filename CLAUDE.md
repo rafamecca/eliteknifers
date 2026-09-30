@@ -36,7 +36,12 @@ resultados com prints, o ADM aprova e o ranking da temporada se atualiza.
     nomear sublíder, editar logo/bio/redes; jogador pede entrada no perfil do clã e sai; perfil do
     jogador `/jogadores/[nick]` com histórico de clãs
   - [ ] Desafios entre clãs — adiado pelo usuário (proposta pendente: desafio com data/modo, aceitar/recusar, sem bônus)
-- [ ] Fase 4 — estatísticas e ranking de jogadores.
+- [ ] Fase 4 — em andamento:
+  - [x] `/jogadores`: lista dos jogadores com o clã ao lado (ordem alfabética, busca e filtro por
+    clã) — decisão do usuário: por enquanto sem estatísticas
+  - [ ] Estatísticas individuais (frags, mortes, MVP) e ranking por elas — regras a definir
+    (proposta feita: cada clã digita os números dos seus jogadores a partir dos prints; MVP
+    automático; ranking por K/D com mínimo de partidas). Tabela `estatisticas_jogador` já existe.
 
 ## Stack e comandos
 
@@ -74,7 +79,7 @@ src/lib/supabase/      clientes servidor/navegador e urlPublica()
 src/components/        UI compartilhada (menu, pódio, tabela, lista de confrontos…)
 src/app/               rotas: / · /ranking · /clas · /clas/[tag][/confrontos] · /confrontos/[id] · /enviar · /pendencias · /como-funciona · /comparar
                        /entrar · /cadastrar · /auth/confirm · /admin · /admin/clas[/novo|/[id]] · /admin/temporadas · /admin/campeonatos[/id]
-                       /campeonatos[/id] · /meu-cla · /jogadores/[nick]
+                       /campeonatos[/id] · /meu-cla · /jogadores[/nick]
 ```
 
 ## Como o banco funciona (importante)

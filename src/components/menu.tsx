@@ -12,6 +12,7 @@ export async function Menu() {
     { href: "/", rotulo: "Início", icone: "inicio" },
     { href: "/ranking", rotulo: "Ranking", icone: "ranking" },
     { href: "/clas", rotulo: "Clãs", icone: "clas" },
+    { href: "/jogadores", rotulo: "Jogadores", icone: "jogadores" },
     { href: "/comparar", rotulo: "Comparar", icone: "comparar" },
     { href: "/campeonatos", rotulo: "Campeonatos", icone: "campeonatos" },
     { href: "/como-funciona", rotulo: "Como funciona", icone: "regras" },

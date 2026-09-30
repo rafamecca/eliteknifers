@@ -257,7 +257,7 @@ Construir em quatro fases, cada uma testada com a comunidade antes da próxima. 
    - [ ] Sistema de desafio entre clãs (adiado: não é necessário no momento)
 4. **Fase 4 — Jogadores**
    - [ ] Estatísticas individuais (frags, mortes, MVP) a partir dos prints das partidas
-   - [ ] Ranking de jogadores
+   - [ ] Ranking de jogadores — por enquanto, lista dos jogadores com o clã ao lado do nome (ordem alfabética, busca e filtro por clã); a ordem por estatísticas vem junto com elas
 
 ### Como usar com o Claude Code
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { BellRing, BookOpen, Crosshair, Flag, Medal, Swords, House, LogOut, Menu as IconeMenu, Send, Shield, Trophy, Users, X } from "lucide-react";
+import { BellRing, BookOpen, Crosshair, Flag, Medal, Swords, UserRound, House, LogOut, Menu as IconeMenu, Send, Shield, Trophy, Users, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -17,6 +17,7 @@ const ICONES = {
   comparar: Swords,
   campeonatos: Medal,
   meuCla: Flag,
+  jogadores: UserRound,
 };
 
 export type ItemMenu = { href: string; rotulo: string; icone: keyof typeof ICONES; contador?: number };
