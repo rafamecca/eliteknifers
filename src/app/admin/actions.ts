@@ -211,3 +211,87 @@ export async function abrirNovaTemporada(_: EstadoAdmin, formData: FormData): Pr
   revalidatePath("/", "layout");
   return { mensagem: atual ? `${atual.nome} encerrada e ${nome} aberta.` : `${nome} aberta.` };
 }
+
+// ---------------------------------------------------------------------------
+// Campeonatos
+// ---------------------------------------------------------------------------
+
+export async function salvarCampeonato(_: EstadoAdmin, formData: FormData): Promise<EstadoAdmin> {
+  const { sessao, supabase } = await clienteAdmin();
+  const id = texto(formData, "id");
+  const dados = {
+    nome: texto(formData, "nome"),
+    data: texto(formData, "data") || null,
+    descricao: texto(formData, "descricao").slice(0, 2000) || null,
+  };
+  if (dados.nome.length < 2 || dados.nome.length > 80) return { erro: "O nome precisa ter de 2 a 80 caracteres." };
+  if (dados.data && !DIA.test(dados.data)) return { erro: "Data inválida." };
+
+  let campeonatoId = id;
+  if (id) {
+    if (!ehUuid(id)) return { erro: "Campeonato inválido." };
+    const { error } = await supabase.from("campeonatos").update(dados).eq("id", id);
+    if (error) return { erro: error.message };
+  } else {
+    const { data, error } = await supabase.from("campeonatos").insert(dados).select("id").single();
+    if (error) return { erro: error.message };
+    campeonatoId = data.id;
+  }
+  await supabase.from("log_admin").insert({
+    adm_id: sessao.usuario.id,
+    acao: id ? "editar_campeonato" : "criar_campeonato",
+    alvo: `campeonatos:${campeonatoId}`,
+    depois: dados,
+  });
+  revalidatePath("/", "layout");
+  if (!id) redirect(`/admin/campeonatos/${campeonatoId}`);
+  return { mensagem: "Campeonato salvo." };
+}
+
+export async function excluirCampeonato(_: EstadoAdmin, formData: FormData): Promise<EstadoAdmin> {
+  const { sessao, supabase } = await clienteAdmin();
+  const id = texto(formData, "id");
+  if (!ehUuid(id)) return { erro: "Campeonato inválido." };
+  const { error } = await supabase.from("campeonatos").delete().eq("id", id);
+  if (error) return { erro: error.message };
+  await supabase.from("log_admin").insert({ adm_id: sessao.usuario.id, acao: "excluir_campeonato", alvo: `campeonatos:${id}` });
+  revalidatePath("/", "layout");
+  redirect("/admin/campeonatos");
+}
+
+export async function adicionarColocacao(_: EstadoAdmin, formData: FormData): Promise<EstadoAdmin> {
+  const { sessao, supabase } = await clienteAdmin();
+  const dados = {
+    campeonato_id: texto(formData, "campeonato"),
+    cla_id: texto(formData, "cla"),
+    colocacao: Number(texto(formData, "colocacao")),
+  };
+  if (!ehUuid(dados.campeonato_id) || !ehUuid(dados.cla_id)) return { erro: "Escolha o clã." };
+  if (!Number.isInteger(dados.colocacao) || dados.colocacao < 1 || dados.colocacao > 64) return { erro: "Colocação inválida." };
+  const { error } = await supabase.from("titulos").insert(dados);
+  if (error) return { erro: error.code === "23505" ? "Esse clã já tem uma colocação neste campeonato." : error.message };
+  await supabase.from("log_admin").insert({
+    adm_id: sessao.usuario.id,
+    acao: "adicionar_colocacao",
+    alvo: `campeonatos:${dados.campeonato_id}`,
+    depois: dados,
+  });
+  revalidatePath("/", "layout");
+  return { mensagem: "Colocação adicionada." };
+}
+
+export async function removerColocacao(_: EstadoAdmin, formData: FormData): Promise<EstadoAdmin> {
+  const { sessao, supabase } = await clienteAdmin();
+  const campeonato = texto(formData, "campeonato");
+  const cla = texto(formData, "cla");
+  const { error } = await supabase.from("titulos").delete().eq("campeonato_id", campeonato).eq("cla_id", cla);
+  if (error) return { erro: error.message };
+  await supabase.from("log_admin").insert({
+    adm_id: sessao.usuario.id,
+    acao: "remover_colocacao",
+    alvo: `campeonatos:${campeonato}`,
+    antes: { cla_id: cla },
+  });
+  revalidatePath("/", "layout");
+  return { mensagem: "Colocação removida." };
+}

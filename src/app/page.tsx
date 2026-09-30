@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Medal } from "lucide-react";
 import Link from "next/link";
 import { CabecalhoPagina } from "@/components/cabecalho-pagina";
 import { ListaConfrontos } from "@/components/lista-confrontos";
@@ -6,15 +6,24 @@ import { Podio } from "@/components/podio";
 import { SemTemporada } from "@/components/sem-temporada";
 import { NOME_SITE } from "@/lib/config";
 import { obterRanking, obterTemporadaAtiva, obterUltimosConfrontos } from "@/lib/dados";
-import { formatarDia } from "@/lib/formato";
+import { formatarDia, hojeEmBrasilia } from "@/lib/formato";
 import { criarClienteServidor } from "@/lib/supabase/server";
+import type { Campeonato } from "@/lib/tipos";
 
 export default async function Inicio() {
   const supabase = await criarClienteServidor();
-  const [temporada, ultimos] = await Promise.all([
+  const [temporada, ultimos, proximo] = await Promise.all([
     obterTemporadaAtiva(supabase),
     obterUltimosConfrontos(supabase, { limite: 8 }),
+    supabase
+      .from("campeonatos")
+      .select("id, nome, data, descricao")
+      .gte("data", hojeEmBrasilia())
+      .order("data")
+      .limit(1)
+      .maybeSingle<Campeonato>(),
   ]);
+  const proximoCampeonato = proximo.data;
   const ranking = temporada ? await obterRanking(supabase, temporada.id) : null;
 
   return (
@@ -46,6 +55,20 @@ export default async function Inicio() {
           </p>
         )}
       </section>
+
+      {proximoCampeonato && (
+        <Link
+          href={`/campeonatos/${proximoCampeonato.id}`}
+          className="cartao mb-10 flex items-center gap-4 border-ouro/40 p-4 transition-colors hover:border-ouro/70"
+        >
+          <Medal className="size-8 shrink-0 text-ouro" />
+          <span className="min-w-0 flex-1">
+            <span className="block text-xs font-semibold tracking-wider text-ouro uppercase">Próximo campeonato</span>
+            <span className="block truncate font-display text-2xl tracking-wide">{proximoCampeonato.nome}</span>
+          </span>
+          <span className="text-sm text-aco-200">{proximoCampeonato.data && formatarDia(proximoCampeonato.data)}</span>
+        </Link>
+      )}
 
       <section>
         <h2 className="titulo-secao">Últimos confrontos</h2>

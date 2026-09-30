@@ -4,7 +4,7 @@ import { PRAZO_RESPOSTA_HORAS } from "./confronto";
 import { historicoEloGeral, type ConfrontoParaElo } from "./elo";
 import type { ConfrontoEstat } from "./estatisticas";
 import { montarRanking, type ConfrontoResumo, type Ranking } from "./ranking";
-import type { ClaResumo, ConfrontoComClas, Temporada } from "./tipos";
+import type { Campeonato, CampeonatoComColocacoes, ClaResumo, ConfrontoComClas, Temporada } from "./tipos";
 
 export const SELECT_CONFRONTO = `id, data, enviado_em, status, resposta, contestacao_resolvida, partidas_a, partidas_b, conta_pontos, variacao, pontos_a_antes, pontos_b_antes,
   cla_a:clas!confrontos_cla_a_id_fkey(id, nome, tag, logo),
@@ -173,5 +173,48 @@ export async function obterConfrontosDoCla(supabase: SupabaseClient, claId: stri
       .order("id")
       .range(de, ate)
       .overrideTypes<ConfrontoDoCla[], { merge: false }>(),
+  );
+}
+
+export const SELECT_CAMPEONATO = "id, nome, data, descricao, colocacoes:titulos(colocacao, cla:clas(id, nome, tag, logo))";
+
+function ordenarColocacoes(c: CampeonatoComColocacoes): CampeonatoComColocacoes {
+  return { ...c, colocacoes: [...c.colocacoes].sort((x, y) => x.colocacao - y.colocacao) };
+}
+
+/** Todos os campeonatos, do mais recente para o mais antigo (sem data por último). */
+export async function obterCampeonatos(supabase: SupabaseClient): Promise<CampeonatoComColocacoes[]> {
+  const lista = garantir(
+    await supabase
+      .from("campeonatos")
+      .select(SELECT_CAMPEONATO)
+      .order("data", { ascending: false, nullsFirst: false })
+      .order("nome")
+      .overrideTypes<CampeonatoComColocacoes[], { merge: false }>(),
+  );
+  return lista.map(ordenarColocacoes);
+}
+
+export async function obterCampeonato(supabase: SupabaseClient, id: string): Promise<CampeonatoComColocacoes | null> {
+  const c = garantir(
+    await supabase.from("campeonatos").select(SELECT_CAMPEONATO).eq("id", id).maybeSingle<CampeonatoComColocacoes>(),
+  );
+  return c && ordenarColocacoes(c);
+}
+
+/** Colocações do clã em campeonatos (títulos do perfil), do campeonato mais recente para o mais antigo. */
+export async function obterTitulosDeCampeonato(
+  supabase: SupabaseClient,
+  claId: string,
+): Promise<{ colocacao: number; campeonato: Campeonato }[]> {
+  const linhas = garantir(
+    await supabase
+      .from("titulos")
+      .select("colocacao, campeonato:campeonatos(id, nome, data, descricao)")
+      .eq("cla_id", claId)
+      .overrideTypes<{ colocacao: number; campeonato: Campeonato }[], { merge: false }>(),
+  );
+  return linhas.sort(
+    (x, y) => x.colocacao - y.colocacao || (y.campeonato.data ?? "").localeCompare(x.campeonato.data ?? ""),
   );
 }

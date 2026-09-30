@@ -29,7 +29,11 @@ resultados com prints, o ADM aprova e o ranking da temporada se atualiza.
   - [x] Estatísticas completas do clã no perfil (temporada/geral via `?visao=geral`, rivais,
     `/clas/[tag]/confrontos` com todos) — cálculo em `src/lib/estatisticas.ts › estatisticasDoCla`
   - [x] "Como funciona" (regras dos modos em `src/lib/regras.ts`; números da pontuação vêm de `elo.ts`)
-- [ ] Fase 3 — campeonatos e títulos, aviso no Discord, líder gerencia o clã, desafios.
+- [ ] Fase 3 — em andamento (Discord adiado pelo usuário):
+  - [x] Campeonatos: `/campeonatos[/id]`, ADM cadastra e define colocações (`titulos`), selos no
+    perfil (`SeloTitulo`), próximo campeonato no Início
+  - [ ] Líder gerencia o clã (pedidos de entrada, membros, sublíder, perfil) — banco pronto na migração 3
+  - [ ] Desafios entre clãs (regras a definir com o usuário)
 - [ ] Fase 4 — estatísticas e ranking de jogadores.
 
 ## Stack e comandos
@@ -67,7 +71,8 @@ src/lib/tipos.ts       formato das linhas do banco (manter em sincronia com o SQ
 src/lib/supabase/      clientes servidor/navegador e urlPublica()
 src/components/        UI compartilhada (menu, pódio, tabela, lista de confrontos…)
 src/app/               rotas: / · /ranking · /clas · /clas/[tag][/confrontos] · /confrontos/[id] · /enviar · /pendencias · /como-funciona · /comparar
-                       /entrar · /cadastrar · /auth/confirm · /admin · /admin/clas[/novo|/[id]] · /admin/temporadas
+                       /entrar · /cadastrar · /auth/confirm · /admin · /admin/clas[/novo|/[id]] · /admin/temporadas · /admin/campeonatos[/id]
+                       /campeonatos[/id]
 ```
 
 ## Como o banco funciona (importante)

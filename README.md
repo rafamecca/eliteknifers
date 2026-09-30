@@ -38,6 +38,7 @@ Quando uma parte nova precisar mudar o banco, rode o arquivo novo de `supabase/m
 | `20260930000000_fase1.sql` | Base da Fase 1 |
 | `20261001000000_fase2_contestacao.sql` | Confirmação e contestação pelo adversário, correção de placar pelo ADM |
 | `20261002000000_fase2_temporadas.sql` | Encerrar temporada e abrir a próxima (com reset dos pontos) |
+| `20261003000000_fase3_comunidade.sql` | Campeonatos (apagar colocações) e gestão do clã pelo líder (pedidos de entrada, membros, sublíder, perfil) |
 
 ### 2. Rodar no computador
 

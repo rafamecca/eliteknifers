@@ -71,3 +71,15 @@ export const NOME_CARGO: Record<Cargo, string> = {
   sublider: "Sublíder",
   membro: "Membro",
 };
+
+export type Campeonato = { id: string; nome: string; data: string | null; descricao: string | null };
+
+export type Colocacao = { colocacao: number; cla: ClaResumo };
+
+/** Campeonato com as colocações dos clãs, como vem de SELECT_CAMPEONATO (src/lib/dados.ts). */
+export type CampeonatoComColocacoes = Campeonato & { colocacoes: Colocacao[] };
+
+/** "Campeão", "Vice", "3º lugar"… */
+export function nomeColocacao(colocacao: number): string {
+  return colocacao === 1 ? "Campeão" : colocacao === 2 ? "Vice" : `${colocacao}º lugar`;
+}

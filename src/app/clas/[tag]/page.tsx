@@ -1,7 +1,8 @@
-import { ExternalLink, Trophy } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { SeloTitulo } from "@/components/colocacao";
 import { ListaConfrontos } from "@/components/lista-confrontos";
 import { LogoCla } from "@/components/logo-cla";
 import { UltimosResultados } from "@/components/ultimos-resultados";
@@ -11,6 +12,7 @@ import {
   obterRanking,
   obterRankingGeral,
   obterTemporadaAtiva,
+  obterTitulosDeCampeonato,
   obterTitulosDeTemporada,
   obterUltimosConfrontos,
 } from "@/lib/dados";
@@ -45,7 +47,7 @@ export default async function PerfilCla({ params, searchParams }: PageProps<"/cl
   if (!cla) notFound();
   const geral = (await searchParams).visao === "geral";
 
-  const [temporada, membros, ultimos, titulos, doCla, clas] = await Promise.all([
+  const [temporada, membros, ultimos, titulos, doCla, clas, titulosCampeonato] = await Promise.all([
     obterTemporadaAtiva(supabase),
     supabase
       .from("membros_cla")
@@ -57,6 +59,7 @@ export default async function PerfilCla({ params, searchParams }: PageProps<"/cl
     obterTitulosDeTemporada(supabase, cla.id),
     obterConfrontosDoCla(supabase, cla.id),
     supabase.from("clas").select("id, nome, tag, logo").overrideTypes<ClaResumo[], { merge: false }>(),
+    obterTitulosDeCampeonato(supabase, cla.id),
   ]);
 
   const [rankingTemporada, pontosTemporada, rankingGeral] = await Promise.all([
@@ -119,16 +122,16 @@ export default async function PerfilCla({ params, searchParams }: PageProps<"/cl
         </div>
       </header>
 
-      {titulos.length > 0 && (
+      {(titulos.length > 0 || titulosCampeonato.length > 0) && (
         <ul className="mb-8 flex flex-wrap gap-2">
           {titulos.map((t) => (
             <li key={t.id}>
-              <a
-                href={`/ranking?temporada=${t.id}`}
-                className="inline-flex items-center gap-2 rounded-full border border-ouro/50 bg-ouro/10 px-3 py-1.5 text-sm font-semibold text-ouro hover:bg-ouro/20"
-              >
-                <Trophy className="size-4" /> Campeão · {t.nome}
-              </a>
+              <SeloTitulo colocacao={1} nome={t.nome} href={`/ranking?temporada=${t.id}`} />
+            </li>
+          ))}
+          {titulosCampeonato.map((t) => (
+            <li key={t.campeonato.id}>
+              <SeloTitulo colocacao={t.colocacao} nome={t.campeonato.nome} href={`/campeonatos/${t.campeonato.id}`} />
             </li>
           ))}
         </ul>

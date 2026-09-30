@@ -42,6 +42,18 @@ Só líder e sublíder mexem em resultados; qualquer jogador pode ter conta e ap
 
 Um jogador pertence a no máximo um clã por vez. Cada troca de clã fica registrada no histórico do jogador.
 
+### Gestão do clã
+
+- O jogador sem clã pede para entrar pelo perfil do clã; só pode ter um pedido aberto por vez e pode cancelá-lo.
+- O líder aceita ou recusa os pedidos, remove membros e nomeia (ou tira) o sublíder entre os membros do clã.
+- O líder edita logo, bio e redes do clã. Nome e tag continuam com o ADM.
+- Qualquer membro pode sair do clã, menos o líder: para trocar de líder, o ADM define o novo.
+
+### Campeonatos
+
+- O ADM cadastra cada campeonato (nome, data, descrição) e as colocações dos clãs (1º, 2º, 3º…).
+- As colocações viram títulos no perfil do clã (Campeão, Vice, 3º lugar), junto com os títulos de campeão de temporada.
+
 ## Páginas do site
 
 Navegação por menu lateral fixo (no celular vira menu recolhível), com botões Entrar e Cadastrar no rodapé do menu.
@@ -240,7 +252,7 @@ Construir em quatro fases, cada uma testada com a comunidade antes da próxima. 
    - [x] Página "Como funciona"
 3. **Fase 3 — Comunidade**
    - [ ] Campeonatos e títulos no perfil
-   - [ ] Aviso automático no Discord quando um confronto é aprovado
+   - [ ] Aviso automático no Discord quando um confronto é aprovado (adiado: não é necessário no momento)
    - [ ] Líder edita perfil do clã e gerencia membros
    - [ ] Sistema de desafio entre clãs
 4. **Fase 4 — Jogadores**
