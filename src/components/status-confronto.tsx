@@ -40,14 +40,18 @@ export function RespostaSelo({ confronto }: { confronto: ComResposta }) {
 }
 
 /** Aviso ao lado de um resultado que conta no ranking mas foi contestado e o ADM ainda não avaliou. */
-export function AvisoContestado({ compacto = false }: { compacto?: boolean }) {
+export function AvisoContestado({ compacto = false, soIconeNoCelular = false }: { compacto?: boolean; soIconeNoCelular?: boolean }) {
   return (
     <span
       className={`${selo} border-destaque/50 bg-destaque/15 text-destaque-claro`}
       title="O adversário contestou este resultado. O ADM vai avaliar."
     >
       <TriangleAlert className="size-3" />
-      {compacto ? <span className="sr-only">Contestado</span> : "Contestado"}
+      {compacto ? (
+        <span className="sr-only">Contestado</span>
+      ) : (
+        <span className={soIconeNoCelular ? "sr-only sm:not-sr-only" : undefined}>Contestado</span>
+      )}
     </span>
   );
 }

@@ -1,5 +1,6 @@
 import { ExternalLink, Trophy } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ListaConfrontos } from "@/components/lista-confrontos";
 import { LogoCla } from "@/components/logo-cla";
@@ -66,6 +67,12 @@ export default async function PerfilCla({ params }: PageProps<"/clas/[tag]">) {
             {cla.fundado_em && <>Fundado em {formatarDia(cla.fundado_em)}</>}
             {!cla.ativo && <span className="ml-2 text-alerta">· Inativo</span>}
           </p>
+          <Link
+            href={`/comparar?a=${encodeURIComponent(cla.tag)}`}
+            className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-destaque-claro hover:underline"
+          >
+            Comparar com outro clã
+          </Link>
           {redes.length > 0 && (
             <div className="mt-2 flex flex-wrap justify-center gap-3 sm:justify-start">
               {redes.map(([rede, url]) => (

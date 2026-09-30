@@ -63,7 +63,7 @@ export function ListaConfrontos({
               {contestacaoAberta(c) && !mostrarResposta && (
                 // Sem coluna à direita (lista do início), o aviso não pode deslocar o placar do centro.
                 <span className={claId || mostrarStatus ? "shrink-0" : "w-full text-right sm:absolute sm:right-4 sm:w-auto"}>
-                  <AvisoContestado />
+                  <AvisoContestado soIconeNoCelular={!!claId} />
                 </span>
               )}
               {mostrarStatus && c.status !== "aprovado" ? (

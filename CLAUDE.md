@@ -25,7 +25,7 @@ resultados com prints, o ADM aprova e o ranking da temporada se atualiza.
     ADM mantém/anula/corrige (inclui corrigir placar antes de aprovar).
   - [x] Temporadas: ADM encerra e abre a próxima (`nova_temporada`), reset, título de campeão
     (= `posicao_final` 1), abas do ranking: atual, anteriores, geral histórico
-  - [ ] Comparação clã x clã
+  - [x] Comparação clã x clã (`/comparar?a=TAG&b=TAG`, cálculo em `src/lib/estatisticas.ts`)
   - [ ] Estatísticas completas do clã
   - [x] "Como funciona" (regras dos modos em `src/lib/regras.ts`; números da pontuação vêm de `elo.ts`)
 - [ ] Fase 3 — campeonatos e títulos, aviso no Discord, líder gerencia o clã, desafios.
@@ -65,7 +65,7 @@ src/lib/sessao.ts      obterSessao(): usuário logado, clã, cargo, ehAdmin, pod
 src/lib/tipos.ts       formato das linhas do banco (manter em sincronia com o SQL)
 src/lib/supabase/      clientes servidor/navegador e urlPublica()
 src/components/        UI compartilhada (menu, pódio, tabela, lista de confrontos…)
-src/app/               rotas: / · /ranking · /clas · /clas/[tag] · /confrontos/[id] · /enviar · /pendencias · /como-funciona
+src/app/               rotas: / · /ranking · /clas · /clas/[tag] · /confrontos/[id] · /enviar · /pendencias · /como-funciona · /comparar
                        /entrar · /cadastrar · /auth/confirm · /admin · /admin/clas[/novo|/[id]] · /admin/temporadas
 ```
 
@@ -74,7 +74,7 @@ src/app/               rotas: / · /ranking · /clas · /clas/[tag] · /confront
 - **Leitura é pública** (RLS `select using (true)`), exceto `log_admin` (só ADM).
 - **Escritas sensíveis passam por funções `security definer`** que conferem cargo e regras:
   `enviar_confronto`, `responder_confronto`, `aprovar_confronto`, `rejeitar_confronto` (também
-  anula aprovado), `manter_confronto`, `corrigir_confronto`, `definir_lideranca`, `remover_membro`.
+  anula aprovado), `manter_confronto`, `corrigir_confronto`, `definir_lideranca`, `remover_membro`, `nova_temporada`.
   Auxiliares internas começam com `_` (`_aplicar_pontos`, `_conta_pontos`…) e não ficam expostas na API. Nunca abra `insert/update` direto nessas tabelas para usuários comuns.
   Escritas simples do ADM (clãs, temporadas) usam RLS com `is_admin()`.
 - **Confronto tem duas colunas de estado**: `status` = decisão do ADM (`pendente`/`aprovado`/`rejeitado`)
