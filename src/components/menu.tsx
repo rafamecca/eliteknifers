@@ -12,6 +12,7 @@ export async function Menu() {
     { href: "/", rotulo: "Início", icone: "inicio" },
     { href: "/ranking", rotulo: "Ranking", icone: "ranking" },
     { href: "/clas", rotulo: "Clãs", icone: "clas" },
+    { href: "/como-funciona", rotulo: "Como funciona", icone: "regras" },
   ];
   if (sessao?.podeEnviar && sessao.cla) {
     const pendencias = await contarPendencias(await criarClienteServidor(), sessao.cla.id);

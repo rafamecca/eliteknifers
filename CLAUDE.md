@@ -26,7 +26,7 @@ resultados com prints, o ADM aprova e o ranking da temporada se atualiza.
   - [ ] Temporadas com reset e ranking geral histórico
   - [ ] Comparação clã x clã
   - [ ] Estatísticas completas do clã
-  - [ ] "Como funciona" (texto das regras já está na especificação, em "Modos de jogo")
+  - [x] "Como funciona" (regras dos modos em `src/lib/regras.ts`; números da pontuação vêm de `elo.ts`)
 - [ ] Fase 3 — campeonatos e títulos, aviso no Discord, líder gerencia o clã, desafios.
 - [ ] Fase 4 — estatísticas e ranking de jogadores.
 
@@ -64,7 +64,7 @@ src/lib/sessao.ts      obterSessao(): usuário logado, clã, cargo, ehAdmin, pod
 src/lib/tipos.ts       formato das linhas do banco (manter em sincronia com o SQL)
 src/lib/supabase/      clientes servidor/navegador e urlPublica()
 src/components/        UI compartilhada (menu, pódio, tabela, lista de confrontos…)
-src/app/               rotas: / · /ranking · /clas · /clas/[tag] · /confrontos/[id] · /enviar · /pendencias
+src/app/               rotas: / · /ranking · /clas · /clas/[tag] · /confrontos/[id] · /enviar · /pendencias · /como-funciona
                        /entrar · /cadastrar · /auth/confirm · /admin · /admin/clas[/novo|/[id]]
 ```
 
