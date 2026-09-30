@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Paleta: grafite com detalhes em aço e vermelho de destaque (cor final ainda em "Pendências"). */
+/* Paleta: grafite com detalhes em aço e laranja-fogo de destaque (das chamas da logo). */
 @theme {
   --color-grafite-950: #0c0d0f;
   --color-grafite-900: #131518;
@@ -12,8 +12,8 @@
   --color-aco-200: #c9d0d7;
   --color-aco-400: #97a2ad;
   --color-aco-500: #737e8a;
-  --color-destaque: #e03c3c;
-  --color-destaque-claro: #ff6b64;
+  --color-destaque: #f06a1c;
+  --color-destaque-claro: #ff9a45;
   --color-ouro: #e2b84a;
   --color-prata: #c3cad2;
   --color-bronze: #c27b45;
@@ -47,7 +47,7 @@ body {
 }
 
 @utility btn-destaque {
-  @apply btn bg-destaque text-white hover:bg-destaque-claro;
+  @apply btn bg-destaque text-grafite-950 hover:bg-destaque-claro;
 }
 
 @utility btn-secundario {

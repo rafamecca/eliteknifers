@@ -18,7 +18,7 @@ export function StatusConfrontoSelo({ status }: { status: StatusConfronto }) {
 const RESPOSTA: Record<EstadoResposta, { nome: string; cor: string }> = {
   aguardando: { nome: "Aguardando adversário", cor: "border-grafite-600 bg-grafite-800 text-aco-200" },
   confirmado: { nome: "Confirmado pelo adversário", cor: "border-vitoria/40 bg-vitoria/10 text-vitoria" },
-  contestado: { nome: "Contestado", cor: "border-destaque/50 bg-destaque/15 text-destaque-claro" },
+  contestado: { nome: "Contestado", cor: "border-derrota/50 bg-derrota/15 text-derrota" },
   sem_resposta: { nome: "Sem resposta", cor: "border-grafite-600 bg-grafite-800 text-aco-400" },
 };
 
@@ -43,7 +43,7 @@ export function RespostaSelo({ confronto }: { confronto: ComResposta }) {
 export function AvisoContestado({ compacto = false }: { compacto?: boolean }) {
   return (
     <span
-      className={`${selo} border-destaque/50 bg-destaque/15 text-destaque-claro`}
+      className={`${selo} border-derrota/50 bg-derrota/15 text-derrota`}
       title="O adversário contestou este resultado. O ADM vai avaliar."
     >
       <TriangleAlert className="size-3" />

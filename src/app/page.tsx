@@ -1,6 +1,7 @@
 import { ArrowRight, Medal } from "lucide-react";
 import Link from "next/link";
 import { CabecalhoPagina } from "@/components/cabecalho-pagina";
+import { LogoFaca } from "@/components/logo-faca";
 import { ListaConfrontos } from "@/components/lista-confrontos";
 import { Podio } from "@/components/podio";
 import { SemTemporada } from "@/components/sem-temporada";
@@ -36,7 +37,9 @@ export default async function Inicio() {
             ? `Ranking de clãs @79 · ${formatarDia(temporada.inicio)} a ${formatarDia(temporada.fim)}`
             : "Ranking de clãs @79"
         }
-      />
+      >
+        <LogoFaca className="-my-4 hidden w-72 drop-shadow-[0_8px_24px_rgba(240,106,28,0.25)] md:block" titulo="" />
+      </CabecalhoPagina>
 
       <section className="mb-10">
         <div className="mb-3 flex items-center justify-between">
@@ -65,8 +68,9 @@ export default async function Inicio() {
           <span className="min-w-0 flex-1">
             <span className="block text-xs font-semibold tracking-wider text-ouro uppercase">Próximo campeonato</span>
             <span className="block truncate font-display text-2xl tracking-wide">{proximoCampeonato.nome}</span>
+            <span className="block text-xs text-aco-400 sm:hidden">{proximoCampeonato.data && formatarDia(proximoCampeonato.data)}</span>
           </span>
-          <span className="text-sm text-aco-200">{proximoCampeonato.data && formatarDia(proximoCampeonato.data)}</span>
+          <span className="hidden text-sm text-aco-200 sm:block">{proximoCampeonato.data && formatarDia(proximoCampeonato.data)}</span>
         </Link>
       )}
 

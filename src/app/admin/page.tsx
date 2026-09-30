@@ -81,7 +81,7 @@ export default async function FilaAprovacao() {
   function cartao(c: Pendente) {
     const contestado = contestacaoAberta(c);
     return (
-      <li key={c.id} className={`cartao space-y-5 p-5 ${contestado ? "border-destaque" : ""}`}>
+      <li key={c.id} className={`cartao space-y-5 p-5 ${contestado ? "border-derrota/70" : ""}`}>
         <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-aco-400">
           <span>
             {formatarDataHora(c.data)} · enviado por <strong className="text-aco-200">{c.enviado?.nick ?? "?"}</strong> ({c.cla_a.tag})
@@ -96,7 +96,7 @@ export default async function FilaAprovacao() {
         </div>
 
         {contestado && c.motivo_contestacao && (
-          <p className="rounded-lg border border-destaque/50 bg-destaque/10 px-3 py-2 text-sm">
+          <p className="rounded-lg border border-derrota/50 bg-derrota/10 px-3 py-2 text-sm">
             <strong>Contestado pelo {c.cla_b.tag}:</strong> {c.motivo_contestacao}
           </p>
         )}
@@ -130,7 +130,7 @@ export default async function FilaAprovacao() {
     <>
       {contestados.length > 0 && (
         <section className="mb-12">
-          <h1 className="mb-2 font-display text-4xl tracking-wide text-destaque-claro uppercase">
+          <h1 className="mb-2 font-display text-4xl tracking-wide text-derrota uppercase">
             Contestações <span className="text-aco-500">({contestados.length})</span>
           </h1>
           <p className="mb-6 text-sm text-aco-400">

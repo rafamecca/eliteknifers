@@ -270,11 +270,11 @@ Construir em quatro fases, cada uma testada com a comunidade antes da próxima. 
 
 ## Pendências a definir
 
-- [ ] Nome do site e domínio
-- [ ] Logo e cor de destaque
+- [x] Nome do site: **Elite Knifers** (domínio ainda a definir)
+- [x] Logo e cor de destaque: kukri de aço com chamas laranja/amarelo e cabo com amarração de couro; destaque laranja-fogo (#f06a1c) sobre grafite
 - [x] Texto das regras do @79 (facas e itens permitidos) para a página "Como funciona" — ver "Modos de jogo"
 - [x] Confrontos @mix e @79 contam no mesmo ranking? Sim, contam juntos.
-- [ ] Quem serão os ADMs
-- [ ] Datas da primeira temporada
+- [ ] Quem serão os ADMs (o usuário configura depois, em Table Editor › usuarios › papel = adm)
+- [ ] Datas da primeira temporada (o usuário ajusta depois em Painel ADM › Temporadas)
 - [ ] Confirmar os números da pontuação (K = 32, mínimo de 3 partidas, 3 confrontos para aparecer no ranking)
 - [ ] Lista inicial dos clãs, com tag, líder e sublíder

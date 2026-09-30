@@ -69,7 +69,7 @@ export default async function PaginaConfronto({ params }: PageProps<"/confrontos
       {c.resposta === "contestado" && c.motivo_contestacao && (
         <p
           className={`rounded-lg border px-4 py-3 text-sm ${
-            contestacaoAberta(c) ? "border-destaque/50 bg-destaque/10 text-aco-50" : "border-grafite-700 bg-grafite-900 text-aco-200"
+            contestacaoAberta(c) ? "border-derrota/50 bg-derrota/10 text-aco-50" : "border-grafite-700 bg-grafite-900 text-aco-200"
           }`}
         >
           <strong>Contestado pelo {c.cla_b.tag}:</strong> {c.motivo_contestacao}

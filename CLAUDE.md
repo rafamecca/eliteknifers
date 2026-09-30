@@ -135,8 +135,10 @@ src/app/               rotas: / · /ranking · /clas · /clas/[tag][/confrontos]
   ranking calculado pelo site (`obterRanking`) e vão para `nova_temporada`; o título de campeão é
   `pontos_temporada.posicao_final = 1` (a tabela `titulos` fica para os campeonatos da Fase 3).
 - Consultas que podem passar de 1000 linhas usam `buscarTodos` (paginação) em `src/lib/dados.ts`.
-- Nome do site, cor de destaque e logo ainda estão em "Pendências": nome em `src/lib/config.ts`,
-  cores em `src/app/globals.css` (`@theme`).
+- Identidade: nome "Elite Knifers" (`src/lib/config.ts`); logo = kukri com chamas em
+  `src/components/logo-faca.tsx` (mesmo desenho no favicon `src/app/icon.svg`); destaque laranja-fogo
+  em `src/app/globals.css` (`@theme`). Botão de destaque usa texto escuro (contraste). "Contestado"
+  usa o vermelho de derrota para não se confundir com o destaque.
 
 ## Convenções
 

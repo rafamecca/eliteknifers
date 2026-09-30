@@ -1,10 +1,11 @@
 "use client";
 
-import { BellRing, BookOpen, Crosshair, Flag, Medal, Swords, UserRound, House, LogOut, Menu as IconeMenu, Send, Shield, Trophy, Users, X } from "lucide-react";
+import { BellRing, BookOpen, Flag, Medal, Swords, UserRound, House, LogOut, Menu as IconeMenu, Send, Shield, Trophy, Users, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { NOME_SITE } from "@/lib/config";
+import { LogoFaca } from "./logo-faca";
 
 const ICONES = {
   inicio: House,
@@ -84,7 +85,7 @@ export function MenuLateral({ itens, usuario, sairAction }: Props) {
                 <Icone className={`size-5 ${marcado ? "text-destaque-claro" : ""}`} />
                 {rotulo}
                 {!!contador && (
-                  <span className="ml-auto grid min-w-5 place-items-center rounded-full bg-destaque px-1.5 text-xs font-bold text-white">
+                  <span className="ml-auto grid min-w-5 place-items-center rounded-full bg-destaque px-1.5 text-xs font-bold text-grafite-950">
                     {contador}
                   </span>
                 )}
@@ -126,9 +127,7 @@ export function MenuLateral({ itens, usuario, sairAction }: Props) {
 function Marca({ onClick }: { onClick: () => void }) {
   return (
     <Link href="/" onClick={onClick} className="flex items-center gap-2">
-      <span className="grid size-8 place-items-center rounded-md bg-destaque">
-        <Crosshair className="size-5 text-white" />
-      </span>
+      <LogoFaca variante="icone" className="-my-1 -ml-1 size-11" titulo="" />
       <span className="font-display text-2xl tracking-wider">{NOME_SITE}</span>
     </Link>
   );
