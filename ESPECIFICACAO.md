@@ -19,6 +19,15 @@ O site tem ranking por temporada (trimestral) e ranking geral histórico, perfil
 | Temporada | Período de 3 meses com ranking próprio, que é resetado ao final. |
 | Campeonato | Torneio organizado pelo ADM, que gera títulos para os clãs. |
 
+## Modos de jogo
+
+Os clãs combinam entre si qual dos dois modos vão jogar.
+
+| Modo | Liberado | Proibido |
+| --- | --- | --- |
+| @mix | Máscara palhaço, colete 5%, Fang Blade (pesada), machete (1 por time), gordão. | Máscara de dano com machete, troca rápida, colete acima de 5%, qualquer tipo de HP+, Fang Blade (leve), boneca, WP Smoke. |
+| @79 | Máscara palhaço, colete 5%, troca rápida, Fang Blade (leve e pesada), machete (1 por time), gordão e boneca. | Máscara de dano com machete, colete acima de 5%, qualquer tipo de HP+, WP Smoke. |
+
 ## Tipos de usuário e permissões
 
 Só líder e sublíder mexem em resultados; qualquer jogador pode ter conta e aparecer no elenco do seu clã.
@@ -54,11 +63,14 @@ Navegação por menu lateral fixo (no celular vira menu recolhível), com botõe
 
 ## Fluxo de envio e aprovação
 
-Um resultado só entra no ranking depois de passar pelo clã adversário e pelo ADM.
+O ADM decide se o resultado vale; o clã adversário tem 12h, contadas a partir do envio, para confirmar ou contestar. As duas coisas correm em paralelo: o ADM pode aprovar sem esperar a resposta, e o resultado já entra no ranking.
 
-&#91;embedded content: fluxo de um resultado · 3 respostas do adversário, 1 decisão do ADM\]
-
-Qualquer que seja a resposta do adversário, a decisão final é sempre do ADM; contestações chegam para ele com destaque.
+- Se o adversário contestar (mesmo depois da aprovação), o confronto continua valendo e aparece com o aviso **Contestado** ao lado, até o ADM avaliar.
+- Se o adversário não responder em 12h, fica **Sem resposta** e o resultado segue normalmente.
+- Contestações chegam para o ADM com destaque. Ele escolhe uma de três saídas:
+  - **Manter**: o resultado fica como está e o aviso some.
+  - **Anular**: o confronto passa a Rejeitado e os pontos que ele deu são desfeitos (só os dele; os outros confrontos não mudam).
+  - **Corrigir**: o ADM ajusta placar e/ou rounds; os pontos antigos são desfeitos e os do placar corrigido são aplicados, calculados com os pontos que os clãs tinham quando o confronto foi aprovado.
 
 ### O que o formulário pede
 
@@ -72,21 +84,27 @@ Qualquer que seja a resposta do adversário, a decisão final é sempre do ADM; 
 
 ### Status de um confronto
 
-| Status | Quando acontece |
+Cada confronto tem a decisão do ADM e a resposta do adversário, que andam separadas.
+
+| Decisão do ADM | Quando acontece |
 | --- | --- |
-| Aguardando adversário | Logo após o envio. O líder ou sublíder adversário é avisado. |
-| Confirmado | O adversário confirmou. Vai para a fila do ADM. |
-| Contestado | O adversário contestou e escreveu o motivo. Vai para a fila do ADM com destaque. |
-| Sem resposta | O adversário não respondeu em 12h. Vai para a fila do ADM. |
+| Aguardando ADM | Logo após o envio. |
 | Aprovado | O ADM aprovou. Pontos e estatísticas são atualizados. |
-| Rejeitado | O ADM rejeitou com motivo. Não conta em nada. |
+| Rejeitado | O ADM rejeitou (ou anulou após contestação) com motivo. Não conta em nada; se já tinha contado pontos, eles são desfeitos. |
+
+| Resposta do adversário | Quando acontece |
+| --- | --- |
+| Aguardando adversário | Logo após o envio. O líder ou sublíder adversário vê o resultado em "Minhas pendências". |
+| Confirmado | O adversário confirmou dentro das 12h. |
+| Contestado | O adversário contestou dentro das 12h e escreveu o motivo. Aviso "Contestado" ao lado do confronto até o ADM avaliar. |
+| Sem resposta | Passaram 12h do envio sem resposta. Não dá mais para confirmar nem contestar. |
 
 ### Regras de envio
 
 - Prazo de 24h após o confronto para enviar.
 - Só um dos dois clãs envia; se o outro tentar enviar o mesmo confronto, o site avisa que já existe um pendente.
 - Prints são comprimidos no envio, e o site bloqueia um print idêntico a outro já enviado.
-- O ADM pode editar placar ou rounds antes de aprovar, e toda edição fica registrada no log.
+- O ADM pode corrigir placar ou rounds antes ou depois de aprovar, e toda edição fica registrada no log.
 
 ## Pontuação, temporadas e estatísticas
 
@@ -241,7 +259,8 @@ Construir em quatro fases, cada uma testada com a comunidade antes da próxima. 
 
 - [ ] Nome do site e domínio
 - [ ] Logo e cor de destaque
-- [ ] Texto das regras do @79 (facas e itens permitidos) para a página "Como funciona"
+- [x] Texto das regras do @79 (facas e itens permitidos) para a página "Como funciona" — ver "Modos de jogo"
+- [ ] Confrontos @mix e @79 contam no mesmo ranking? O formulário deve registrar o modo?
 - [ ] Quem serão os ADMs
 - [ ] Datas da primeira temporada
 - [ ] Confirmar os números da pontuação (K = 32, mínimo de 3 partidas, 3 confrontos para aparecer no ranking)
