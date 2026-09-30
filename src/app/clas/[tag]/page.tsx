@@ -2,6 +2,7 @@ import { ExternalLink } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { BotaoCancelarPedido, BotaoPedirEntrada } from "@/app/meu-cla/forms";
 import { SeloTitulo } from "@/components/colocacao";
 import { ListaConfrontos } from "@/components/lista-confrontos";
 import { LogoCla } from "@/components/logo-cla";
@@ -19,6 +20,7 @@ import {
 import { estatisticasDoCla } from "@/lib/estatisticas";
 import { PONTOS_INICIAIS } from "@/lib/elo";
 import { formatarDataCurta, formatarDia } from "@/lib/formato";
+import { obterSessao } from "@/lib/sessao";
 import { criarClienteServidor } from "@/lib/supabase/server";
 import { NOME_CARGO, type Cargo, type Cla, type ClaResumo } from "@/lib/tipos";
 
@@ -62,6 +64,20 @@ export default async function PerfilCla({ params, searchParams }: PageProps<"/cl
     obterTitulosDeCampeonato(supabase, cla.id),
   ]);
 
+  // Jogador logado sem clã: pode pedir para entrar (ou já tem um pedido aberto).
+  const sessao = await obterSessao();
+  const semCla = sessao && !sessao.cla && !sessao.usuario.banido && cla.ativo;
+  const pedidoAberto = semCla
+    ? (
+        await supabase
+          .from("pedidos_entrada")
+          .select("id, cla_id")
+          .eq("usuario_id", sessao.usuario.id)
+          .eq("status", "pendente")
+          .maybeSingle<{ id: string; cla_id: string }>()
+      ).data
+    : null;
+
   const [rankingTemporada, pontosTemporada, rankingGeral] = await Promise.all([
     temporada ? obterRanking(supabase, temporada.id) : null,
     temporada
@@ -104,6 +120,26 @@ export default async function PerfilCla({ params, searchParams }: PageProps<"/cl
             {cla.fundado_em && <>Fundado em {formatarDia(cla.fundado_em)}</>}
             {!cla.ativo && <span className="ml-2 text-alerta">· Inativo</span>}
           </p>
+          {semCla && (
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-3 sm:justify-start">
+              {!pedidoAberto ? (
+                <BotaoPedirEntrada claId={cla.id} />
+              ) : pedidoAberto.cla_id === cla.id ? (
+                <>
+                  <span className="text-sm text-alerta">Pedido enviado, aguardando o líder.</span>
+                  <BotaoCancelarPedido pedidoId={pedidoAberto.id} />
+                </>
+              ) : (
+                <span className="text-sm text-aco-400">
+                  Você tem um pedido aberto em outro clã (veja em{" "}
+                  <Link href="/meu-cla" className="underline">
+                    Meu clã
+                  </Link>
+                  ).
+                </span>
+              )}
+            </div>
+          )}
           <Link
             href={`/comparar?a=${tagUrl}`}
             className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-destaque-claro hover:underline"
@@ -280,7 +316,9 @@ export default async function PerfilCla({ params, searchParams }: PageProps<"/cl
             <ul className="cartao divide-y divide-grafite-800">
               {elenco.map((m) => (
                 <li key={m.usuario.id} className="flex items-center justify-between px-4 py-2.5">
-                  <span className="font-medium">{m.usuario.nick}</span>
+                  <Link href={`/jogadores/${encodeURIComponent(m.usuario.nick)}`} className="font-medium hover:underline">
+                    {m.usuario.nick}
+                  </Link>
                   <span className={`text-xs ${m.cargo === "membro" ? "text-aco-500" : "font-semibold text-destaque-claro"}`}>
                     {NOME_CARGO[m.cargo]}
                   </span>

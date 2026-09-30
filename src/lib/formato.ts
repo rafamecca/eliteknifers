@@ -49,3 +49,10 @@ export function fimDoPeriodo(dia: string, meses: number): string {
   const fim = new Date(Date.UTC(a, m - 1 + meses, d) - 86_400_000);
   return fim.toISOString().slice(0, 10);
 }
+
+const dataComAno = new Intl.DateTimeFormat("pt-BR", { timeZone: FUSO, day: "2-digit", month: "2-digit", year: "numeric" });
+
+/** "30/09/2026" (horário de Brasília). */
+export function formatarData(iso: string): string {
+  return dataComAno.format(new Date(iso));
+}

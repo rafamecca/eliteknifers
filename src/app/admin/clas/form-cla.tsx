@@ -1,56 +1,20 @@
 "use client";
 
-import { ImagePlus, Loader2 } from "lucide-react";
 import { useActionState, useState } from "react";
-import { LogoCla } from "@/components/logo-cla";
-import { comprimirImagem, subirArquivo, TIPOS_ACEITOS } from "@/lib/imagem";
-import { criarClienteNavegador } from "@/lib/supabase/client";
+import { CampoLogo } from "@/components/campo-logo";
 import type { Cla } from "@/lib/tipos";
 import { salvarCla, type EstadoAdmin } from "../actions";
 import { AvisoAdmin } from "../aviso";
 
 export function FormCla({ cla }: { cla?: Cla }) {
   const [estado, acao, salvando] = useActionState<EstadoAdmin, FormData>(salvarCla, {});
-  const [logo, setLogo] = useState(cla?.logo ?? "");
   const [tag, setTag] = useState(cla?.tag ?? "");
   const [subindo, setSubindo] = useState(false);
-  const [erroLogo, setErroLogo] = useState<string | null>(null);
-
-  async function escolherLogo(arquivo: File | undefined) {
-    if (!arquivo) return;
-    setErroLogo(null);
-    setSubindo(true);
-    try {
-      const imagem = await comprimirImagem(arquivo, 512, 0.9);
-      setLogo(await subirArquivo(criarClienteNavegador(), "logos", "clas", imagem));
-    } catch (e) {
-      setErroLogo(e instanceof Error ? e.message : "Falha ao enviar o logo.");
-    } finally {
-      setSubindo(false);
-    }
-  }
 
   return (
     <form action={acao} className="cartao space-y-4 p-5">
       {cla && <input type="hidden" name="id" value={cla.id} />}
-      <input type="hidden" name="logo" value={logo} />
-
-      <div className="flex items-center gap-4">
-        <LogoCla cla={{ tag: tag || "?", logo: logo || null }} tamanho={72} />
-        <div className="space-y-1">
-          <label className="btn-secundario cursor-pointer">
-            <input type="file" accept={TIPOS_ACEITOS} className="sr-only" onChange={(e) => escolherLogo(e.target.files?.[0])} />
-            {subindo ? <Loader2 className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}
-            {logo ? "Trocar logo" : "Enviar logo"}
-          </label>
-          {logo && (
-            <button type="button" onClick={() => setLogo("")} className="block text-xs text-aco-400 underline">
-              remover logo
-            </button>
-          )}
-          {erroLogo && <p className="text-xs text-derrota">{erroLogo}</p>}
-        </div>
-      </div>
+      <CampoLogo tag={tag} inicial={cla?.logo ?? null} pasta="clas" aoMudarEnvio={setSubindo} />
 
       <div className="grid gap-4 sm:grid-cols-[1fr_2fr]">
         <Campo rotulo="Tag" nome="tag" valor={tag} onChange={setTag} required maxLength={12} placeholder="SwK" />

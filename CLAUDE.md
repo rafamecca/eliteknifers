@@ -32,7 +32,9 @@ resultados com prints, o ADM aprova e o ranking da temporada se atualiza.
 - [ ] Fase 3 — em andamento (Discord adiado pelo usuário):
   - [x] Campeonatos: `/campeonatos[/id]`, ADM cadastra e define colocações (`titulos`), selos no
     perfil (`SeloTitulo`), próximo campeonato no Início
-  - [ ] Líder gerencia o clã (pedidos de entrada, membros, sublíder, perfil) — banco pronto na migração 3
+  - [x] Líder gerencia o clã em `/meu-cla`: pedidos de entrada (`pedidos_entrada`), remover membro,
+    nomear sublíder, editar logo/bio/redes; jogador pede entrada no perfil do clã e sai; perfil do
+    jogador `/jogadores/[nick]` com histórico de clãs
   - [ ] Desafios entre clãs (regras a definir com o usuário)
 - [ ] Fase 4 — estatísticas e ranking de jogadores.
 
@@ -72,7 +74,7 @@ src/lib/supabase/      clientes servidor/navegador e urlPublica()
 src/components/        UI compartilhada (menu, pódio, tabela, lista de confrontos…)
 src/app/               rotas: / · /ranking · /clas · /clas/[tag][/confrontos] · /confrontos/[id] · /enviar · /pendencias · /como-funciona · /comparar
                        /entrar · /cadastrar · /auth/confirm · /admin · /admin/clas[/novo|/[id]] · /admin/temporadas · /admin/campeonatos[/id]
-                       /campeonatos[/id]
+                       /campeonatos[/id] · /meu-cla · /jogadores/[nick]
 ```
 
 ## Como o banco funciona (importante)
@@ -80,7 +82,8 @@ src/app/               rotas: / · /ranking · /clas · /clas/[tag][/confrontos]
 - **Leitura é pública** (RLS `select using (true)`), exceto `log_admin` (só ADM).
 - **Escritas sensíveis passam por funções `security definer`** que conferem cargo e regras:
   `enviar_confronto`, `responder_confronto`, `aprovar_confronto`, `rejeitar_confronto` (também
-  anula aprovado), `manter_confronto`, `corrigir_confronto`, `definir_lideranca`, `remover_membro`, `nova_temporada`.
+  anula aprovado), `manter_confronto`, `corrigir_confronto`, `definir_lideranca`, `remover_membro` (ADM ou líder), `nova_temporada`, `pedir_entrada`,
+  `cancelar_pedido`, `responder_pedido`, `sair_do_cla`, `nomear_sublider`, `editar_perfil_cla`.
   Auxiliares internas começam com `_` (`_aplicar_pontos`, `_conta_pontos`…) e não ficam expostas na API. Nunca abra `insert/update` direto nessas tabelas para usuários comuns.
   Escritas simples do ADM (clãs, temporadas) usam RLS com `is_admin()`.
 - **Confronto tem duas colunas de estado**: `status` = decisão do ADM (`pendente`/`aprovado`/`rejeitado`)

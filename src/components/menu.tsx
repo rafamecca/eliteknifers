@@ -16,6 +16,20 @@ export async function Menu() {
     { href: "/campeonatos", rotulo: "Campeonatos", icone: "campeonatos" },
     { href: "/como-funciona", rotulo: "Como funciona", icone: "regras" },
   ];
+  if (sessao) {
+    // Líder: número de pedidos de entrada aguardando (0 se a migração da Fase 3 ainda não rodou).
+    const pedidos =
+      sessao.cargo === "lider" && sessao.cla
+        ? (
+            await (await criarClienteServidor())
+              .from("pedidos_entrada")
+              .select("id", { count: "exact", head: true })
+              .eq("cla_id", sessao.cla.id)
+              .eq("status", "pendente")
+          ).count ?? 0
+        : 0;
+    itens.push({ href: "/meu-cla", rotulo: "Meu clã", icone: "meuCla", contador: pedidos });
+  }
   if (sessao?.podeEnviar && sessao.cla) {
     const pendencias = await contarPendencias(await criarClienteServidor(), sessao.cla.id);
     itens.push({ href: "/enviar", rotulo: "Enviar resultado", icone: "enviar" });
