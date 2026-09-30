@@ -61,3 +61,47 @@ export function ajustarRounds(rounds: RoundsPartida[], total: number): RoundsPar
   const n = Math.max(0, Math.min(total, MAX_PARTIDAS));
   return Array.from({ length: n }, (_, i) => rounds[i] ?? { a: null, b: null });
 }
+
+// ---------------------------------------------------------------------------
+// Resposta do adversário (ESPECIFICACAO.md › Fluxo de envio e aprovação)
+// ---------------------------------------------------------------------------
+
+export const PRAZO_RESPOSTA_HORAS = 12;
+
+export type EstadoResposta = "aguardando" | "confirmado" | "contestado" | "sem_resposta";
+
+type ComResposta = {
+  enviado_em: string;
+  status: "pendente" | "aprovado" | "rejeitado";
+  resposta: "aguardando" | "confirmado" | "contestado";
+  contestacao_resolvida: string | null;
+};
+
+export function prazoResposta(enviadoEm: string): Date {
+  return new Date(new Date(enviadoEm).getTime() + PRAZO_RESPOSTA_HORAS * 3600_000);
+}
+
+/** Resposta do adversário, com "sem resposta" quando o prazo de 12h passou. */
+export function estadoResposta(c: ComResposta, agora: Date = new Date()): EstadoResposta {
+  if (c.resposta !== "aguardando") return c.resposta;
+  return agora > prazoResposta(c.enviado_em) ? "sem_resposta" : "aguardando";
+}
+
+/** O adversário ainda pode confirmar ou contestar. */
+export function podeResponder(c: ComResposta, agora: Date = new Date()): boolean {
+  return c.status !== "rejeitado" && estadoResposta(c, agora) === "aguardando";
+}
+
+/** Contestação ainda não avaliada pelo ADM (mostra o aviso "Contestado"). */
+export function contestacaoAberta(c: ComResposta): boolean {
+  return c.resposta === "contestado" && c.contestacao_resolvida === null && c.status !== "rejeitado";
+}
+
+/** "5h 20min" até o fim do prazo (ou null se já passou). */
+export function tempoRestante(enviadoEm: string, agora: Date = new Date()): string | null {
+  const ms = prazoResposta(enviadoEm).getTime() - agora.getTime();
+  if (ms <= 0) return null;
+  const min = Math.ceil(ms / 60_000);
+  const h = Math.floor(min / 60);
+  return h > 0 ? `${h}h ${String(min % 60).padStart(2, "0")}min` : `${min}min`;
+}

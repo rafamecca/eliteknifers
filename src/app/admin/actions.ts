@@ -37,7 +37,35 @@ export async function rejeitarConfronto(_: EstadoAdmin, formData: FormData): Pro
   const { error } = await supabase.rpc("rejeitar_confronto", { p_confronto: texto(formData, "id"), p_motivo: motivo });
   if (error) return { erro: error.message };
   revalidatePath("/", "layout");
-  return { mensagem: "Rejeitado." };
+  return { mensagem: formData.get("anular") ? "Resultado anulado e pontos desfeitos." : "Rejeitado." };
+}
+
+export async function manterConfronto(_: EstadoAdmin, formData: FormData): Promise<EstadoAdmin> {
+  const { supabase } = await clienteAdmin();
+  const { error } = await supabase.rpc("manter_confronto", { p_confronto: texto(formData, "id") });
+  if (error) return { erro: error.message };
+  revalidatePath("/", "layout");
+  return { mensagem: "Resultado mantido." };
+}
+
+/** Corrige placar e rounds. Se já aprovado, o banco troca os pontos antigos pelos do placar novo. */
+export async function corrigirConfronto(_: EstadoAdmin, formData: FormData): Promise<EstadoAdmin> {
+  const { supabase } = await clienteAdmin();
+  let rounds: unknown;
+  try {
+    rounds = JSON.parse(texto(formData, "rounds"));
+  } catch {
+    return { erro: "Rounds inválidos." };
+  }
+  const { error } = await supabase.rpc("corrigir_confronto", {
+    p_confronto: texto(formData, "id"),
+    p_partidas_a: Number(texto(formData, "partidas_a")),
+    p_partidas_b: Number(texto(formData, "partidas_b")),
+    p_rounds: rounds,
+  });
+  if (error) return { erro: error.message };
+  revalidatePath("/", "layout");
+  return { mensagem: "Placar corrigido." };
 }
 
 // ---------------------------------------------------------------------------

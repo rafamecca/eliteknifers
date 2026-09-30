@@ -1,9 +1,10 @@
 // Consultas de leitura usadas por várias páginas.
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { PRAZO_RESPOSTA_HORAS } from "./confronto";
 import { montarRanking, type ConfrontoResumo, type Ranking } from "./ranking";
 import type { ClaResumo, ConfrontoComClas, Temporada } from "./tipos";
 
-export const SELECT_CONFRONTO = `id, data, status, partidas_a, partidas_b, conta_pontos, variacao, pontos_a_antes, pontos_b_antes,
+export const SELECT_CONFRONTO = `id, data, enviado_em, status, resposta, contestacao_resolvida, partidas_a, partidas_b, conta_pontos, variacao, pontos_a_antes, pontos_b_antes,
   cla_a:clas!confrontos_cla_a_id_fkey(id, nome, tag, logo),
   cla_b:clas!confrontos_cla_b_id_fkey(id, nome, tag, logo)`;
 
@@ -47,4 +48,35 @@ export async function obterUltimosConfrontos(
   let consulta = supabase.from("confrontos").select(SELECT_CONFRONTO).eq("status", "aprovado");
   if (claId) consulta = consulta.or(`cla_a_id.eq.${claId},cla_b_id.eq.${claId}`);
   return garantir(await consulta.order("data", { ascending: false }).limit(limite).overrideTypes<ConfrontoComClas[], { merge: false }>());
+}
+
+/** Início da janela de resposta: resultados enviados depois disso ainda podem ser respondidos. */
+function limiteResposta(): string {
+  return new Date(Date.now() - PRAZO_RESPOSTA_HORAS * 3600_000).toISOString();
+}
+
+/** Quantos resultados enviados contra o clã ainda esperam confirmação ou contestação. */
+export async function contarPendencias(supabase: SupabaseClient, claId: string): Promise<number> {
+  const { count } = await supabase
+    .from("confrontos")
+    .select("id", { count: "exact", head: true })
+    .eq("cla_b_id", claId)
+    .eq("resposta", "aguardando")
+    .neq("status", "rejeitado")
+    .gte("enviado_em", limiteResposta());
+  return count ?? 0;
+}
+
+export async function obterAguardandoResposta(supabase: SupabaseClient, claId: string): Promise<ConfrontoComClas[]> {
+  return garantir(
+    await supabase
+      .from("confrontos")
+      .select(SELECT_CONFRONTO)
+      .eq("cla_b_id", claId)
+      .eq("resposta", "aguardando")
+      .neq("status", "rejeitado")
+      .gte("enviado_em", limiteResposta())
+      .order("enviado_em", { ascending: true })
+      .overrideTypes<ConfrontoComClas[], { merge: false }>(),
+  );
 }

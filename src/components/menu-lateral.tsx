@@ -1,6 +1,6 @@
 "use client";
 
-import { Crosshair, House, LogOut, Menu as IconeMenu, Send, Shield, Trophy, Users, X } from "lucide-react";
+import { BellRing, Crosshair, House, LogOut, Menu as IconeMenu, Send, Shield, Trophy, Users, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -12,9 +12,10 @@ const ICONES = {
   clas: Users,
   enviar: Send,
   admin: Shield,
+  pendencias: BellRing,
 };
 
-export type ItemMenu = { href: string; rotulo: string; icone: keyof typeof ICONES };
+export type ItemMenu = { href: string; rotulo: string; icone: keyof typeof ICONES; contador?: number };
 
 type Props = {
   itens: ItemMenu[];
@@ -37,11 +38,14 @@ export function MenuLateral({ itens, usuario, sairAction }: Props) {
         <button
           type="button"
           onClick={() => setAberto((a) => !a)}
-          className="rounded-lg p-2 text-aco-200 hover:bg-grafite-800"
+          className="relative rounded-lg p-2 text-aco-200 hover:bg-grafite-800"
           aria-label={aberto ? "Fechar menu" : "Abrir menu"}
           aria-expanded={aberto}
         >
           {aberto ? <X className="size-6" /> : <IconeMenu className="size-6" />}
+          {!aberto && itens.some((i) => i.contador) && (
+            <span className="absolute top-1.5 right-1.5 size-2.5 rounded-full bg-destaque" aria-label="Há pendências" />
+          )}
         </button>
       </header>
 
@@ -57,7 +61,7 @@ export function MenuLateral({ itens, usuario, sairAction }: Props) {
         </div>
 
         <nav className="flex-1 space-y-1 px-3 py-2">
-          {itens.map(({ href, rotulo, icone }) => {
+          {itens.map(({ href, rotulo, icone, contador }) => {
             const Icone = ICONES[icone];
             const marcado = ativo(href);
             return (
@@ -74,6 +78,11 @@ export function MenuLateral({ itens, usuario, sairAction }: Props) {
               >
                 <Icone className={`size-5 ${marcado ? "text-destaque-claro" : ""}`} />
                 {rotulo}
+                {!!contador && (
+                  <span className="ml-auto grid min-w-5 place-items-center rounded-full bg-destaque px-1.5 text-xs font-bold text-white">
+                    {contador}
+                  </span>
+                )}
               </Link>
             );
           })}

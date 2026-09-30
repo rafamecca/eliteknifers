@@ -20,8 +20,13 @@ resultados com prints, o ADM aprova e o ranking da temporada se atualiza.
   resultado com prints e rounds, fila de aprovação, Elo na aprovação, ranking com pódio e tabela,
   perfil do clã com últimos 20 confrontos. (Extras mínimos para navegar: Início, lista de clãs,
   página do confronto.)
-- [ ] Fase 2 — confirmação/contestação pelo adversário (12h), temporadas com reset e ranking geral
-  histórico, comparação clã x clã, estatísticas completas, "Como funciona".
+- [ ] Fase 2 — em andamento:
+  - [x] Confirmação/contestação pelo adversário (12h a partir do envio), "Minhas pendências",
+    ADM mantém/anula/corrige (inclui corrigir placar antes de aprovar).
+  - [ ] Temporadas com reset e ranking geral histórico
+  - [ ] Comparação clã x clã
+  - [ ] Estatísticas completas do clã
+  - [ ] "Como funciona" (texto das regras já está na especificação, em "Modos de jogo")
 - [ ] Fase 3 — campeonatos e títulos, aviso no Discord, líder gerencia o clã, desafios.
 - [ ] Fase 4 — estatísticas e ranking de jogadores.
 
@@ -33,7 +38,7 @@ Storage) via `@supabase/ssr` · Vitest · deploy na Vercel.
 ```bash
 npm run dev          # localhost:3000 (precisa de .env.local — ver .env.example)
 npm test             # vitest: src/lib/*.test.ts
-npm run test:sql     # sobe um Postgres descartável e roda supabase/tests/fase1_test.sql
+npm run test:sql     # Postgres descartável; cada supabase/tests/*_test.sql roda num banco limpo
 npm run lint
 npm run typecheck    # rode `npx next typegen` antes se PageProps/LayoutProps não existirem
 npm run build
@@ -59,7 +64,7 @@ src/lib/sessao.ts      obterSessao(): usuário logado, clã, cargo, ehAdmin, pod
 src/lib/tipos.ts       formato das linhas do banco (manter em sincronia com o SQL)
 src/lib/supabase/      clientes servidor/navegador e urlPublica()
 src/components/        UI compartilhada (menu, pódio, tabela, lista de confrontos…)
-src/app/               rotas: / · /ranking · /clas · /clas/[tag] · /confrontos/[id] · /enviar
+src/app/               rotas: / · /ranking · /clas · /clas/[tag] · /confrontos/[id] · /enviar · /pendencias
                        /entrar · /cadastrar · /auth/confirm · /admin · /admin/clas[/novo|/[id]]
 ```
 
@@ -67,13 +72,20 @@ src/app/               rotas: / · /ranking · /clas · /clas/[tag] · /confront
 
 - **Leitura é pública** (RLS `select using (true)`), exceto `log_admin` (só ADM).
 - **Escritas sensíveis passam por funções `security definer`** que conferem cargo e regras:
-  `enviar_confronto`, `aprovar_confronto`, `rejeitar_confronto`, `definir_lideranca`,
-  `remover_membro`. Nunca abra `insert/update` direto nessas tabelas para usuários comuns.
+  `enviar_confronto`, `responder_confronto`, `aprovar_confronto`, `rejeitar_confronto` (também
+  anula aprovado), `manter_confronto`, `corrigir_confronto`, `definir_lideranca`, `remover_membro`.
+  Auxiliares internas começam com `_` (`_aplicar_pontos`, `_conta_pontos`…) e não ficam expostas na API. Nunca abra `insert/update` direto nessas tabelas para usuários comuns.
   Escritas simples do ADM (clãs, temporadas) usam RLS com `is_admin()`.
-- **O Elo é gravado só pelo banco**, em `aprovar_confronto` (linhas travadas, tudo numa transação,
+- **Confronto tem duas colunas de estado**: `status` = decisão do ADM (`pendente`/`aprovado`/`rejeitado`)
+  e `resposta` = adversário (`aguardando`/`confirmado`/`contestado`). "Sem resposta" não é gravado:
+  é `aguardando` com mais de 12h desde `enviado_em` (`src/lib/confronto.ts › estadoResposta`).
+  Contestação aberta = `contestado` com `contestacao_resolvida` nula → aviso "Contestado".
+- **O Elo é gravado só pelo banco**, em `aprovar_confronto`/`corrigir_confronto`/`rejeitar_confronto` (linhas travadas, tudo numa transação,
   com registro em `log_admin`). `src/lib/elo.ts` existe para prévias na tela e testes. Mudou a
   fórmula? Mude os dois e os testes dos dois (`elo.test.ts` e `fase1_test.sql`).
 - As validações do formulário (`src/lib/confronto.ts`) são repetidas no SQL; o SQL é quem garante.
+- **O usuário roda as migrações à mão** no SQL Editor do Supabase. Push no branch principal publica
+  na Vercel na hora: com migração nova, peça para ele rodar o SQL **antes** do push e liste no README.
 - **Migrações são imutáveis depois de aplicadas**: crie um arquivo novo em `supabase/migrations/`
   (prefixo de data) em vez de editar um antigo. Rode `npm run test:sql` e acrescente testes em
   `supabase/tests/`.
@@ -85,8 +97,10 @@ src/app/               rotas: / · /ranking · /clas · /clas/[tag] · /confront
 
 ## Decisões tomadas onde a especificação deixava em aberto
 
-- Fase 1 não tem confirmação do adversário: o envio fica "Aguardando adversário" e o ADM pode
-  aprovar/rejeitar direto de qualquer status pendente.
+- O ADM não espera o adversário: aprova quando quiser e o resultado já conta. O adversário tem 12h
+  do envio para confirmar/contestar, mesmo depois de aprovado (decisão do usuário, já na especificação).
+- Anular desfaz só a variação daquele confronto; corrigir recalcula com `pontos_a_antes/pontos_b_antes`
+  (os pontos da época da aprovação). O `pico` não é reduzido ao desfazer.
 - "Mesmo confronto" (envio duplicado): par de clãs com resultado pendente a até 2h do horário informado.
 - "Primeiro confronto do dia": dia no horário de Brasília; decidido na ordem de aprovação
   (vale o primeiro aprovado que contou pontos). A fila do ADM é ordenada pela data do confronto.

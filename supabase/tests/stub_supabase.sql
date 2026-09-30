@@ -1,9 +1,6 @@
 -- Imita o mínimo do Supabase (papéis, auth e storage) para testar as migrações num
 -- Postgres comum. Usado por scripts/testar-sql.sh — NÃO rodar no Supabase de verdade.
 
-create role anon nologin;
-create role authenticated nologin;
-
 create schema auth;
 create table auth.users (
   id uuid primary key default gen_random_uuid(),

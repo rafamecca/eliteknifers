@@ -1,5 +1,7 @@
 import { sair } from "@/app/(conta)/actions";
+import { contarPendencias } from "@/lib/dados";
 import { obterSessao } from "@/lib/sessao";
+import { criarClienteServidor } from "@/lib/supabase/server";
 import { NOME_CARGO } from "@/lib/tipos";
 import { MenuLateral, type ItemMenu } from "./menu-lateral";
 
@@ -11,7 +13,11 @@ export async function Menu() {
     { href: "/ranking", rotulo: "Ranking", icone: "ranking" },
     { href: "/clas", rotulo: "Clãs", icone: "clas" },
   ];
-  if (sessao?.podeEnviar) itens.push({ href: "/enviar", rotulo: "Enviar resultado", icone: "enviar" });
+  if (sessao?.podeEnviar && sessao.cla) {
+    const pendencias = await contarPendencias(await criarClienteServidor(), sessao.cla.id);
+    itens.push({ href: "/enviar", rotulo: "Enviar resultado", icone: "enviar" });
+    itens.push({ href: "/pendencias", rotulo: "Minhas pendências", icone: "pendencias", contador: pendencias });
+  }
   if (sessao?.ehAdmin) itens.push({ href: "/admin", rotulo: "Painel ADM", icone: "admin" });
 
   const usuario = sessao && {

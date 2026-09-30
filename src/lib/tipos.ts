@@ -2,13 +2,11 @@
 
 export type Papel = "jogador" | "adm";
 export type Cargo = "lider" | "sublider" | "membro";
-export type StatusConfronto =
-  | "aguardando_adversario"
-  | "confirmado"
-  | "contestado"
-  | "sem_resposta"
-  | "aprovado"
-  | "rejeitado";
+/** Decisão do ADM. */
+export type StatusConfronto = "pendente" | "aprovado" | "rejeitado";
+/** Resposta do adversário (o "sem resposta" é calculado pelo prazo, ver src/lib/confronto.ts). */
+export type RespostaAdversario = "aguardando" | "confirmado" | "contestado";
+export type ResolucaoContestacao = "mantido" | "anulado" | "corrigido";
 
 export type Usuario = {
   id: string;
@@ -48,7 +46,10 @@ export type Print = {
 export type ConfrontoComClas = {
   id: string;
   data: string;
+  enviado_em: string;
   status: StatusConfronto;
+  resposta: RespostaAdversario;
+  contestacao_resolvida: ResolucaoContestacao | null;
   partidas_a: number;
   partidas_b: number;
   conta_pontos: boolean | null;
@@ -59,13 +60,8 @@ export type ConfrontoComClas = {
   cla_b: ClaResumo;
 };
 
-export const PENDENTES: StatusConfronto[] = ["aguardando_adversario", "confirmado", "contestado", "sem_resposta"];
-
 export const NOME_STATUS: Record<StatusConfronto, string> = {
-  aguardando_adversario: "Aguardando adversário",
-  confirmado: "Confirmado",
-  contestado: "Contestado",
-  sem_resposta: "Sem resposta",
+  pendente: "Aguardando ADM",
   aprovado: "Aprovado",
   rejeitado: "Rejeitado",
 };

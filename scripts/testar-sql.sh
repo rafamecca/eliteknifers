@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Testa as migrações em um Postgres local descartável (precisa de initdb/pg_ctl/psql 15+).
+# Cada arquivo supabase/tests/*_test.sql roda num banco novo, com o stub do Supabase e todas as migrações.
 # Uso: npm run test:sql
 set -euo pipefail
 
@@ -22,10 +23,18 @@ trap limpar EXIT
 "${COMO[@]}" initdb -D "$DIR/dados" -U postgres --auth=trust >/dev/null
 "${COMO[@]}" pg_ctl -D "$DIR/dados" -o "-p $PORTA -k $DIR -c listen_addresses=''" -l "$DIR/log" start -w >/dev/null
 
-PSQL=(psql -h "$DIR" -p "$PORTA" -U postgres -d postgres -q -v ON_ERROR_STOP=1)
-"${PSQL[@]}" -f "$RAIZ/supabase/tests/stub_supabase.sql"
-for m in "$RAIZ"/supabase/migrations/*.sql; do
-  "${PSQL[@]}" -f "$m"
+# Papéis são globais no cluster: cria uma vez só.
+psql -h "$DIR" -p "$PORTA" -U postgres -d postgres -q -c "create role anon nologin; create role authenticated nologin;"
+
+for teste in "$RAIZ"/supabase/tests/*_test.sql; do
+  nome="$(basename "$teste" .sql)"
+  createdb -h "$DIR" -p "$PORTA" -U postgres "$nome"
+  PSQL=(psql -h "$DIR" -p "$PORTA" -U postgres -d "$nome" -q -v ON_ERROR_STOP=1)
+  "${PSQL[@]}" -f "$RAIZ/supabase/tests/stub_supabase.sql"
+  for m in "$RAIZ"/supabase/migrations/*.sql; do
+    "${PSQL[@]}" -f "$m"
+  done
+  "${PSQL[@]}" -o /dev/null -f "$teste"
+  echo "OK: $nome"
 done
-"${PSQL[@]}" -o /dev/null -f "$RAIZ/supabase/tests/fase1_test.sql"
 echo "OK: todos os testes SQL passaram"

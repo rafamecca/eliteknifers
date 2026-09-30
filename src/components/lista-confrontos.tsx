@@ -1,23 +1,28 @@
 import Link from "next/link";
+import { contestacaoAberta } from "@/lib/confronto";
 import { formatarDataCurta, formatarVariacao } from "@/lib/formato";
 import type { ConfrontoComClas } from "@/lib/tipos";
 import { LogoCla } from "./logo-cla";
-import { StatusConfrontoSelo } from "./status-confronto";
+import { AvisoContestado, RespostaSelo, StatusConfrontoSelo } from "./status-confronto";
 import { LetraResultado } from "./ultimos-resultados";
 
 /**
  * Lista compacta de confrontos. Com `claId`, mostra resultado e variação do ponto de vista desse clã.
  * Com `mostrarStatus`, mostra o status (para listas que incluem pendentes).
+ * Resultado com contestação aberta ganha o aviso "Contestado".
  */
 export function ListaConfrontos({
   confrontos,
   claId,
   mostrarStatus = false,
+  mostrarResposta = false,
   vazio = "Nenhum confronto ainda.",
 }: {
   confrontos: ConfrontoComClas[];
   claId?: string;
   mostrarStatus?: boolean;
+  /** Mostra a resposta do adversário (confirmado, contestado, aguardando…) numa linha abaixo. */
+  mostrarResposta?: boolean;
   vazio?: string;
 }) {
   if (confrontos.length === 0) {
@@ -37,7 +42,9 @@ export function ListaConfrontos({
           <li key={c.id}>
             <Link
               href={`/confrontos/${c.id}`}
-              className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-xl border border-grafite-800 bg-grafite-900 px-3 py-2.5 transition-colors hover:border-grafite-600 sm:flex-nowrap sm:gap-3 sm:px-4"
+              className={`relative flex flex-wrap items-center gap-x-2 gap-y-1 rounded-xl border border-grafite-800 bg-grafite-900 px-3 py-2.5 transition-colors hover:border-grafite-600 sm:gap-3 sm:px-4 ${
+                mostrarResposta ? "" : "sm:flex-nowrap"
+              }`}
             >
               <span className="w-10 shrink-0 text-xs text-aco-400 tabular-nums">{formatarDataCurta(c.data)}</span>
               <span className="flex min-w-0 flex-1 items-center justify-end gap-2">
@@ -53,6 +60,12 @@ export function ListaConfrontos({
                 <LogoCla cla={c.cla_b} tamanho={28} />
                 <span className="truncate font-semibold">{c.cla_b.tag}</span>
               </span>
+              {contestacaoAberta(c) && !mostrarResposta && (
+                // Sem coluna à direita (lista do início), o aviso não pode deslocar o placar do centro.
+                <span className={claId || mostrarStatus ? "shrink-0" : "w-full text-right sm:absolute sm:right-4 sm:w-auto"}>
+                  <AvisoContestado />
+                </span>
+              )}
               {mostrarStatus && c.status !== "aprovado" ? (
                 <span className="w-full shrink-0 text-right sm:w-auto">
                   <StatusConfrontoSelo status={c.status} />
@@ -67,6 +80,12 @@ export function ListaConfrontos({
                   <LetraResultado letra={letra} />
                 </span>
               ) : null}
+              {mostrarResposta && (
+                <span className="flex w-full flex-wrap justify-end gap-2">
+                  {c.status !== "aprovado" && <StatusConfrontoSelo status={c.status} />}
+                  <RespostaSelo confronto={c} />
+                </span>
+              )}
             </Link>
           </li>
         );

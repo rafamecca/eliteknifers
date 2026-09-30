@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PartidasEPrints, PlacarConfronto } from "@/components/detalhe-confronto";
-import { StatusConfrontoSelo } from "@/components/status-confronto";
+import { ResponderConfronto } from "@/components/responder-confronto";
+import { RespostaSelo, StatusConfrontoSelo } from "@/components/status-confronto";
+import { contestacaoAberta, podeResponder, tempoRestante } from "@/lib/confronto";
 import { garantir, SELECT_CONFRONTO } from "@/lib/dados";
 import { formatarDataHora, formatarVariacao } from "@/lib/formato";
+import { obterSessao } from "@/lib/sessao";
 import { criarClienteServidor } from "@/lib/supabase/server";
 import type { ConfrontoComClas, Partida, Print } from "@/lib/tipos";
 import { ehUuid } from "@/lib/uuid";
@@ -13,7 +16,7 @@ export const metadata: Metadata = { title: "Confronto" };
 type ConfrontoDetalhe = ConfrontoComClas & {
   observacao: string | null;
   motivo_rejeicao: string | null;
-  enviado_em: string;
+  motivo_contestacao: string | null;
   enviado: { nick: string } | null;
   partidas: Partida[];
   prints: Print[];
@@ -28,7 +31,7 @@ export default async function PaginaConfronto({ params }: PageProps<"/confrontos
     await supabase
       .from("confrontos")
       .select(
-        `${SELECT_CONFRONTO}, observacao, motivo_rejeicao, enviado_em,
+        `${SELECT_CONFRONTO}, observacao, motivo_rejeicao, motivo_contestacao,
          enviado:usuarios!confrontos_enviado_por_fkey(nick),
          partidas(id, numero, rounds_a, rounds_b),
          prints(id, partida_id, arquivo, tipo)`,
@@ -39,13 +42,44 @@ export default async function PaginaConfronto({ params }: PageProps<"/confrontos
   if (!c) notFound();
 
   const aprovado = c.status === "aprovado";
+  const sessao = await obterSessao();
+  const souAdversario = sessao?.podeEnviar && sessao.cla?.id === c.cla_b.id;
+  const RESOLUCAO = { mantido: "manteve o resultado", corrigido: "corrigiu o placar", anulado: "anulou o resultado" };
 
   return (
     <article className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-aco-400">{formatarDataHora(c.data)}</p>
-        <StatusConfrontoSelo status={c.status} />
+        <div className="flex flex-wrap gap-2">
+          <StatusConfrontoSelo status={c.status} />
+          <RespostaSelo confronto={c} />
+        </div>
       </div>
+
+      {souAdversario && podeResponder(c) && (
+        <section className="cartao border-alerta/50 p-5">
+          <h2 className="titulo-secao">Resultado enviado contra o {c.cla_b.tag}</h2>
+          <p className="mb-4 text-sm text-aco-200">
+            Confira o placar e os prints. Se estiver certo, confirme; se não, conteste e explique o motivo para o ADM.
+          </p>
+          <ResponderConfronto id={c.id} prazo={tempoRestante(c.enviado_em)} />
+        </section>
+      )}
+
+      {c.resposta === "contestado" && c.motivo_contestacao && (
+        <p
+          className={`rounded-lg border px-4 py-3 text-sm ${
+            contestacaoAberta(c) ? "border-destaque/50 bg-destaque/10 text-aco-50" : "border-grafite-700 bg-grafite-900 text-aco-200"
+          }`}
+        >
+          <strong>Contestado pelo {c.cla_b.tag}:</strong> {c.motivo_contestacao}
+          <span className="mt-1 block text-xs text-aco-400">
+            {contestacaoAberta(c)
+              ? "O resultado continua valendo até o ADM avaliar."
+              : c.contestacao_resolvida && `O ADM ${RESOLUCAO[c.contestacao_resolvida]}.`}
+          </span>
+        </p>
+      )}
 
       <div className="cartao p-5 sm:p-8">
         <PlacarConfronto

@@ -28,6 +28,16 @@ Feito com Next.js 16 + Tailwind CSS 4 + Supabase (banco, login e arquivos), hosp
    Assim a confirmação funciona mesmo se o jogador abrir o e-mail em outro aparelho.
 5. Em **Project Settings › API** copie a **Project URL** e a **Publishable key** (ou a antiga *anon key*).
 
+### Atualizações do banco
+
+Quando uma parte nova precisar mudar o banco, rode o arquivo novo de `supabase/migrations/` no
+**SQL Editor**, **uma vez**, na ordem da data do nome:
+
+| Arquivo | O que traz |
+| --- | --- |
+| `20260930000000_fase1.sql` | Base da Fase 1 |
+| `20261001000000_fase2_contestacao.sql` | Confirmação e contestação pelo adversário, correção de placar pelo ADM |
+
 ### 2. Rodar no computador
 
 Precisa do [Node.js](https://nodejs.org) 20 ou mais novo.

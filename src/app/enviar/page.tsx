@@ -53,7 +53,7 @@ export default async function PaginaEnviar() {
 
       <section className="mt-12">
         <h2 className="titulo-secao">Resultados recentes do {cla.tag}</h2>
-        <ListaConfrontos confrontos={garantir(envios)} claId={cla.id} mostrarStatus vazio="Nenhum resultado enviado ainda." />
+        <ListaConfrontos confrontos={garantir(envios)} claId={cla.id} mostrarResposta vazio="Nenhum resultado enviado ainda." />
       </section>
     </>
   );
