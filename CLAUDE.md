@@ -29,13 +29,13 @@ resultados com prints, o ADM aprova e o ranking da temporada se atualiza.
   - [x] Estatísticas completas do clã no perfil (temporada/geral via `?visao=geral`, rivais,
     `/clas/[tag]/confrontos` com todos) — cálculo em `src/lib/estatisticas.ts › estatisticasDoCla`
   - [x] "Como funciona" (regras dos modos em `src/lib/regras.ts`; números da pontuação vêm de `elo.ts`)
-- [ ] Fase 3 — em andamento (Discord adiado pelo usuário):
+- [x] Fase 3 — Comunidade (Discord e desafios adiados pelo usuário):
   - [x] Campeonatos: `/campeonatos[/id]`, ADM cadastra e define colocações (`titulos`), selos no
     perfil (`SeloTitulo`), próximo campeonato no Início
   - [x] Líder gerencia o clã em `/meu-cla`: pedidos de entrada (`pedidos_entrada`), remover membro,
     nomear sublíder, editar logo/bio/redes; jogador pede entrada no perfil do clã e sai; perfil do
     jogador `/jogadores/[nick]` com histórico de clãs
-  - [ ] Desafios entre clãs (regras a definir com o usuário)
+  - [ ] Desafios entre clãs — adiado pelo usuário (proposta pendente: desafio com data/modo, aceitar/recusar, sem bônus)
 - [ ] Fase 4 — estatísticas e ranking de jogadores.
 
 ## Stack e comandos

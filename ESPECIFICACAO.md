@@ -251,10 +251,10 @@ Construir em quatro fases, cada uma testada com a comunidade antes da próxima. 
    - [x] Estatísticas completas do clã (sequências, rounds, rivais, pico)
    - [x] Página "Como funciona"
 3. **Fase 3 — Comunidade**
-   - [ ] Campeonatos e títulos no perfil
+   - [x] Campeonatos e títulos no perfil
    - [ ] Aviso automático no Discord quando um confronto é aprovado (adiado: não é necessário no momento)
-   - [ ] Líder edita perfil do clã e gerencia membros
-   - [ ] Sistema de desafio entre clãs
+   - [x] Líder edita perfil do clã e gerencia membros
+   - [ ] Sistema de desafio entre clãs (adiado: não é necessário no momento)
 4. **Fase 4 — Jogadores**
    - [ ] Estatísticas individuais (frags, mortes, MVP) a partir dos prints das partidas
    - [ ] Ranking de jogadores
