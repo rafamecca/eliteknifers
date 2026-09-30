@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+/* Paleta: grafite com detalhes em aço e vermelho de destaque (cor final ainda em "Pendências"). */
+@theme {
+  --color-grafite-950: #0c0d0f;
+  --color-grafite-900: #131518;
+  --color-grafite-850: #181b1f;
+  --color-grafite-800: #1f2227;
+  --color-grafite-700: #2b2f35;
+  --color-grafite-600: #3b4048;
+  --color-aco-50: #eef1f4;
+  --color-aco-200: #c9d0d7;
+  --color-aco-400: #97a2ad;
+  --color-aco-500: #737e8a;
+  --color-destaque: #e03c3c;
+  --color-destaque-claro: #ff6b64;
+  --color-ouro: #e2b84a;
+  --color-prata: #c3cad2;
+  --color-bronze: #c27b45;
+  --color-vitoria: #3fb96b;
+  --color-empate: #8a939d;
+  --color-derrota: #e05252;
+  --color-alerta: #e6a23c;
+
+  --font-display: var(--font-oswald), "Arial Narrow", sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  color-scheme: dark;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  @apply bg-grafite-950 text-aco-50 font-sans antialiased;
+}
+
+/* Classes próprias reutilizáveis (Tailwind v4: @utility pode ser usado com @apply e variantes). */
+
+@utility cartao {
+  @apply rounded-xl border border-grafite-700 bg-grafite-900;
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors
+    disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-destaque;
+}
+
+@utility btn-destaque {
+  @apply btn bg-destaque text-white hover:bg-destaque-claro;
+}
+
+@utility btn-secundario {
+  @apply btn border border-grafite-600 bg-grafite-800 text-aco-50 hover:bg-grafite-700;
+}
+
+@utility btn-perigo {
+  @apply btn border border-derrota/50 bg-derrota/10 text-derrota hover:bg-derrota/20;
+}
+
+@utility rotulo {
+  @apply mb-1.5 block text-sm font-medium text-aco-200;
+}
+
+@utility campo {
+  @apply w-full rounded-lg border border-grafite-600 bg-grafite-850 px-3 py-2.5 text-base text-aco-50 placeholder:text-aco-500
+    focus:border-destaque focus:outline-none focus:ring-2 focus:ring-destaque/30 sm:text-sm;
+}
+
+@utility titulo-secao {
+  @apply mb-3 font-display text-2xl tracking-wide text-aco-50 uppercase;
+}

@@ -1,0 +1,40 @@
+import { cache } from "react";
+import { criarClienteServidor } from "./supabase/server";
+import type { Cargo, ClaResumo, Usuario } from "./tipos";
+
+export type Sessao = {
+  usuario: Usuario;
+  cla: ClaResumo | null;
+  cargo: Cargo | null;
+  ehAdmin: boolean;
+  /** Líder ou sublíder de um clã, sem banimento. */
+  podeEnviar: boolean;
+};
+
+/** Quem está logado (ou null). Memorizado por requisição. */
+export const obterSessao = cache(async (): Promise<Sessao | null> => {
+  const supabase = await criarClienteServidor();
+  const { data } = await supabase.auth.getClaims();
+  const uid = data?.claims?.sub;
+  if (!uid) return null;
+
+  const [{ data: usuario }, { data: membro }] = await Promise.all([
+    supabase.from("usuarios").select("id, nick, avatar, papel, banido").eq("id", uid).maybeSingle<Usuario>(),
+    supabase
+      .from("membros_cla")
+      .select("cargo, cla:clas(id, nome, tag, logo)")
+      .eq("usuario_id", uid)
+      .is("saiu_em", null)
+      .maybeSingle<{ cargo: Cargo; cla: ClaResumo }>(),
+  ]);
+  if (!usuario) return null;
+
+  const cargo = membro?.cargo ?? null;
+  return {
+    usuario,
+    cla: membro?.cla ?? null,
+    cargo,
+    ehAdmin: usuario.papel === "adm" && !usuario.banido,
+    podeEnviar: !usuario.banido && (cargo === "lider" || cargo === "sublider"),
+  };
+});
