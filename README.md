@@ -56,6 +56,17 @@ na página de cada clã, define líder e sublíder (eles precisam ter conta no s
    `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` e `NEXT_PUBLIC_SITE_URL` (o endereço do site).
 3. **Deploy**. A cada push no GitHub a Vercel publica de novo sozinha.
 
+Mudou ou cadastrou variáveis depois? Elas só valem num deploy novo:
+**Deployments › ⋯ › Redeploy**.
+
+## Problemas comuns
+
+- **`type "papel_usuario" already exists` no SQL Editor**: a migração já tinha rodado antes;
+  não precisa rodar de novo. Confira em **Table Editor** se as tabelas (`clas`, `confrontos`,
+  `temporadas`…) existem.
+- **`404 DEPLOYMENT_NOT_FOUND` / "No Deployment" na Vercel**: ainda não há deploy de produção que
+  deu certo. Abra **Deployments**, veja o erro do último e, depois de corrigir, clique em **Redeploy**.
+
 ## Comandos
 
 | Comando | O que faz |

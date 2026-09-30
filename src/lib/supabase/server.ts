@@ -4,8 +4,10 @@ import { supabaseEnv } from "./env";
 
 /** Cliente do Supabase para Server Components, Server Actions e Route Handlers. */
 export async function criarClienteServidor() {
-  const { url, chave } = supabaseEnv();
+  // cookies() primeiro: deixa a rota dinâmica, então a falta das variáveis só é
+  // cobrada quando alguém abre a página, e não quebra o build.
   const cookieStore = await cookies();
+  const { url, chave } = supabaseEnv();
 
   return createServerClient(url, chave, {
     cookies: {
