@@ -20,13 +20,14 @@ resultados com prints, o ADM aprova e o ranking da temporada se atualiza.
   resultado com prints e rounds, fila de aprovação, Elo na aprovação, ranking com pódio e tabela,
   perfil do clã com últimos 20 confrontos. (Extras mínimos para navegar: Início, lista de clãs,
   página do confronto.)
-- [ ] Fase 2 — em andamento:
+- [x] Fase 2 — Competição completa:
   - [x] Confirmação/contestação pelo adversário (12h a partir do envio), "Minhas pendências",
     ADM mantém/anula/corrige (inclui corrigir placar antes de aprovar).
   - [x] Temporadas: ADM encerra e abre a próxima (`nova_temporada`), reset, título de campeão
     (= `posicao_final` 1), abas do ranking: atual, anteriores, geral histórico
   - [x] Comparação clã x clã (`/comparar?a=TAG&b=TAG`, cálculo em `src/lib/estatisticas.ts`)
-  - [ ] Estatísticas completas do clã
+  - [x] Estatísticas completas do clã no perfil (temporada/geral via `?visao=geral`, rivais,
+    `/clas/[tag]/confrontos` com todos) — cálculo em `src/lib/estatisticas.ts › estatisticasDoCla`
   - [x] "Como funciona" (regras dos modos em `src/lib/regras.ts`; números da pontuação vêm de `elo.ts`)
 - [ ] Fase 3 — campeonatos e títulos, aviso no Discord, líder gerencia o clã, desafios.
 - [ ] Fase 4 — estatísticas e ranking de jogadores.
@@ -65,7 +66,7 @@ src/lib/sessao.ts      obterSessao(): usuário logado, clã, cargo, ehAdmin, pod
 src/lib/tipos.ts       formato das linhas do banco (manter em sincronia com o SQL)
 src/lib/supabase/      clientes servidor/navegador e urlPublica()
 src/components/        UI compartilhada (menu, pódio, tabela, lista de confrontos…)
-src/app/               rotas: / · /ranking · /clas · /clas/[tag] · /confrontos/[id] · /enviar · /pendencias · /como-funciona · /comparar
+src/app/               rotas: / · /ranking · /clas · /clas/[tag][/confrontos] · /confrontos/[id] · /enviar · /pendencias · /como-funciona · /comparar
                        /entrar · /cadastrar · /auth/confirm · /admin · /admin/clas[/novo|/[id]] · /admin/temporadas
 ```
 
@@ -109,6 +110,10 @@ src/app/               rotas: / · /ranking · /clas · /clas/[tag] · /confront
 - Print repetido: bloqueado se o mesmo hash estiver em resultado não rejeitado (reenvio após
   rejeição pode reusar o print).
 - Aproveitamento = (V + E/2) ÷ confrontos. Coluna "Sequência" mostra os últimos 5 resultados.
+- Estatísticas: "sequência atual" = resultado repetido nos confrontos mais recentes; "maior vitória" =
+  maior diferença de partidas (a mais recente no empate); rivais ordenados por confrontos. Pico da
+  temporada vem de `pontos_temporada.pico`; pico geral, do replay do Elo geral.
+- @mix e @79 contam no mesmo ranking; o envio não registra o modo.
 - Empate total nos critérios de desempate divide a posição.
 - O e-mail fica só em `auth.users` (não é público); `usuarios` não tem coluna email.
 - Ranking geral histórico não é gravado: `obterRankingGeral` recalcula o Elo em TS (`calcularEloGeral`)

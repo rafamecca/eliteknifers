@@ -234,9 +234,9 @@ Construir em quatro fases, cada uma testada com a comunidade antes da próxima. 
    - [ ] Perfil básico do clã com últimos 20 confrontos
 2. **Fase 2 — Competição completa**
    - [x] Confirmação e contestação pelo clã adversário, com prazo de 12h
-   - [ ] Temporadas trimestrais com reset e ranking geral histórico
-   - [ ] Página de comparação clã x clã
-   - [ ] Estatísticas completas do clã (sequências, rounds, rivais, pico)
+   - [x] Temporadas trimestrais com reset e ranking geral histórico
+   - [x] Página de comparação clã x clã
+   - [x] Estatísticas completas do clã (sequências, rounds, rivais, pico)
    - [x] Página "Como funciona"
 3. **Fase 3 — Comunidade**
    - [ ] Campeonatos e títulos no perfil

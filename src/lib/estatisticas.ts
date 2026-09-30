@@ -64,3 +64,115 @@ export function compararClas(confrontos: ConfrontoEstat[], idA: string, idB: str
   }
   return r;
 }
+
+export type Retrospecto = {
+  adversarioId: string;
+  jogos: number;
+  vitorias: number;
+  empates: number;
+  derrotas: number;
+  partidasPro: number;
+  partidasContra: number;
+};
+
+export type EstatisticasCla = {
+  jogos: number;
+  vitorias: number;
+  empates: number;
+  derrotas: number;
+  /** (V + E/2) ÷ confrontos, 0 a 100 — mesma regra do ranking. */
+  aproveitamento: number;
+  partidasPro: number;
+  partidasContra: number;
+  saldoPartidas: number;
+  /** Partidas ganhas ÷ partidas jogadas, 0 a 100. */
+  aproveitamentoPartidas: number;
+  roundsPro: number;
+  roundsContra: number;
+  saldoRounds: number;
+  /** Resultado repetido nos confrontos mais recentes (ex.: 3 vitórias seguidas). */
+  sequenciaAtual: { resultado: ResultadoLetra; quantidade: number } | null;
+  maiorSequenciaVitorias: number;
+  /** Vitória com maior diferença de partidas (a mais recente, se empatar). */
+  maiorVitoria: { confronto: ConfrontoEstat; pro: number; contra: number } | null;
+  /** Retrospecto contra cada adversário, do mais enfrentado para o menos. */
+  rivais: Retrospecto[];
+};
+
+const umaCasa = (n: number) => Math.round(n * 10) / 10;
+
+/** Estatísticas de um clã a partir dos confrontos aprovados dele (de uma temporada ou de todas). */
+export function estatisticasDoCla(confrontos: ConfrontoEstat[], claId: string): EstatisticasCla {
+  const doCla = confrontos
+    .filter((c) => c.cla_a_id === claId || c.cla_b_id === claId)
+    .sort((x, y) => x.data.localeCompare(y.data) || x.id.localeCompare(y.id));
+
+  const e: EstatisticasCla = {
+    jogos: 0,
+    vitorias: 0,
+    empates: 0,
+    derrotas: 0,
+    aproveitamento: 0,
+    partidasPro: 0,
+    partidasContra: 0,
+    saldoPartidas: 0,
+    aproveitamentoPartidas: 0,
+    roundsPro: 0,
+    roundsContra: 0,
+    saldoRounds: 0,
+    sequenciaAtual: null,
+    maiorSequenciaVitorias: 0,
+    maiorVitoria: null,
+    rivais: [],
+  };
+  const rivais = new Map<string, Retrospecto>();
+  let seguidasV = 0;
+
+  for (const c of doCla) {
+    const v = doPontoDeVista(c, claId);
+    e.jogos++;
+    if (v.resultado === "V") e.vitorias++;
+    else if (v.resultado === "D") e.derrotas++;
+    else e.empates++;
+    e.partidasPro += v.pro;
+    e.partidasContra += v.contra;
+    e.roundsPro += v.roundsPro;
+    e.roundsContra += v.roundsContra;
+
+    seguidasV = v.resultado === "V" ? seguidasV + 1 : 0;
+    e.maiorSequenciaVitorias = Math.max(e.maiorSequenciaVitorias, seguidasV);
+    e.sequenciaAtual =
+      e.sequenciaAtual?.resultado === v.resultado
+        ? { resultado: v.resultado, quantidade: e.sequenciaAtual.quantidade + 1 }
+        : { resultado: v.resultado, quantidade: 1 };
+
+    if (v.resultado === "V" && (!e.maiorVitoria || v.pro - v.contra >= e.maiorVitoria.pro - e.maiorVitoria.contra)) {
+      e.maiorVitoria = { confronto: c, pro: v.pro, contra: v.contra };
+    }
+
+    const r = rivais.get(v.adversarioId) ?? {
+      adversarioId: v.adversarioId,
+      jogos: 0,
+      vitorias: 0,
+      empates: 0,
+      derrotas: 0,
+      partidasPro: 0,
+      partidasContra: 0,
+    };
+    r.jogos++;
+    if (v.resultado === "V") r.vitorias++;
+    else if (v.resultado === "D") r.derrotas++;
+    else r.empates++;
+    r.partidasPro += v.pro;
+    r.partidasContra += v.contra;
+    rivais.set(v.adversarioId, r);
+  }
+
+  e.saldoPartidas = e.partidasPro - e.partidasContra;
+  e.saldoRounds = e.roundsPro - e.roundsContra;
+  e.aproveitamento = e.jogos ? umaCasa(((e.vitorias + e.empates / 2) / e.jogos) * 100) : 0;
+  const partidas = e.partidasPro + e.partidasContra;
+  e.aproveitamentoPartidas = partidas ? umaCasa((e.partidasPro / partidas) * 100) : 0;
+  e.rivais = [...rivais.values()].sort((x, y) => y.jogos - x.jogos || y.vitorias - x.vitorias);
+  return e;
+}

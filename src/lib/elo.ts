@@ -51,16 +51,25 @@ export type ConfrontoParaElo = {
 };
 
 /** Elo geral histórico: começa em 1000 e aplica, na ordem recebida (ordem de aprovação), todos os
- *  confrontos que valeram pontos. Nunca reseta entre temporadas. */
-export function calcularEloGeral(confrontos: ConfrontoParaElo[]): Map<string, number> {
+ *  confrontos que valeram pontos. Nunca reseta entre temporadas. Devolve os pontos e o pico de cada clã. */
+export function historicoEloGeral(confrontos: ConfrontoParaElo[]): { pontos: Map<string, number>; pico: Map<string, number> } {
   const pontos = new Map<string, number>();
+  const pico = new Map<string, number>();
+  const aplicar = (cla: string, valor: number) => {
+    pontos.set(cla, valor);
+    pico.set(cla, Math.max(pico.get(cla) ?? PONTOS_INICIAIS, valor));
+  };
   for (const c of confrontos) {
     if (!c.conta_pontos) continue;
     const ra = pontos.get(c.cla_a_id) ?? PONTOS_INICIAIS;
     const rb = pontos.get(c.cla_b_id) ?? PONTOS_INICIAIS;
     const delta = variacaoElo(ra, rb, c.partidas_a, c.partidas_b);
-    pontos.set(c.cla_a_id, ra + delta);
-    pontos.set(c.cla_b_id, rb - delta);
+    aplicar(c.cla_a_id, ra + delta);
+    aplicar(c.cla_b_id, rb - delta);
   }
-  return pontos;
+  return { pontos, pico };
+}
+
+export function calcularEloGeral(confrontos: ConfrontoParaElo[]): Map<string, number> {
+  return historicoEloGeral(confrontos).pontos;
 }

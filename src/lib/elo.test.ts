@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calcularEloGeral, chanceEsperada, multiplicadorMargem, pontosNaNovaTemporada, variacaoElo } from "./elo";
+import { calcularEloGeral, chanceEsperada, historicoEloGeral, multiplicadorMargem, pontosNaNovaTemporada, variacaoElo } from "./elo";
 
 describe("variacaoElo — exemplos da especificação", () => {
   it.each([
@@ -60,5 +60,14 @@ describe("calcularEloGeral", () => {
     expect(pontos.get("a")).toBe(1021 - segundo);
     expect(pontos.get("b")).toBe(979 + segundo);
     expect(pontos.has("c")).toBe(false);
+  });
+
+  it("guarda o pico de cada clã", () => {
+    const { pico } = historicoEloGeral([
+      { cla_a_id: "a", cla_b_id: "b", partidas_a: 5, partidas_b: 1, conta_pontos: true },
+      { cla_a_id: "b", cla_b_id: "a", partidas_a: 5, partidas_b: 0, conta_pontos: true },
+    ]);
+    expect(pico.get("a")).toBe(1021);
+    expect(pico.get("b")).toBeGreaterThan(1000);
   });
 });

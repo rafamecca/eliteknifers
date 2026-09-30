@@ -1,7 +1,8 @@
 // Consultas de leitura usadas por várias páginas.
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { PRAZO_RESPOSTA_HORAS } from "./confronto";
-import { calcularEloGeral, type ConfrontoParaElo } from "./elo";
+import { historicoEloGeral, type ConfrontoParaElo } from "./elo";
+import type { ConfrontoEstat } from "./estatisticas";
 import { montarRanking, type ConfrontoResumo, type Ranking } from "./ranking";
 import type { ClaResumo, ConfrontoComClas, Temporada } from "./tipos";
 
@@ -65,7 +66,7 @@ export async function obterRanking(
 }
 
 /** Ranking geral histórico: Elo que nunca reseta + totais de todas as temporadas (ESPECIFICACAO.md › Temporadas). */
-export async function obterRankingGeral(supabase: SupabaseClient): Promise<Ranking<ClaResumo>> {
+export async function obterRankingGeral(supabase: SupabaseClient): Promise<Ranking<ClaResumo> & { pico: Map<string, number> }> {
   const [clas, confrontos] = await Promise.all([
     supabase.from("clas").select("id, nome, tag, logo").eq("ativo", true).overrideTypes<ClaResumo[], { merge: false }>(),
     buscarTodos((de, ate) =>
@@ -79,7 +80,8 @@ export async function obterRankingGeral(supabase: SupabaseClient): Promise<Ranki
         .overrideTypes<(ConfrontoResumo & ConfrontoParaElo)[], { merge: false }>(),
     ),
   ]);
-  return montarRanking(garantir(clas), calcularEloGeral(confrontos), confrontos);
+  const { pontos, pico } = historicoEloGeral(confrontos);
+  return { ...montarRanking(garantir(clas), pontos, confrontos), pico };
 }
 
 export type TemporadaEncerrada = Temporada & {
@@ -154,5 +156,22 @@ export async function obterAguardandoResposta(supabase: SupabaseClient, claId: s
       .gte("enviado_em", limiteResposta())
       .order("enviado_em", { ascending: true })
       .overrideTypes<ConfrontoComClas[], { merge: false }>(),
+  );
+}
+
+export type ConfrontoDoCla = ConfrontoEstat & { temporada_id: string };
+
+/** Todos os confrontos aprovados de um clã (todas as temporadas), com os rounds de cada partida. */
+export async function obterConfrontosDoCla(supabase: SupabaseClient, claId: string): Promise<ConfrontoDoCla[]> {
+  return buscarTodos((de, ate) =>
+    supabase
+      .from("confrontos")
+      .select("id, data, temporada_id, cla_a_id, cla_b_id, partidas_a, partidas_b, partidas(rounds_a, rounds_b)")
+      .eq("status", "aprovado")
+      .or(`cla_a_id.eq.${claId},cla_b_id.eq.${claId}`)
+      .order("data")
+      .order("id")
+      .range(de, ate)
+      .overrideTypes<ConfrontoDoCla[], { merge: false }>(),
   );
 }
