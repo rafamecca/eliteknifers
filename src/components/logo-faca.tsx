@@ -1,7 +1,8 @@
 import { useId } from "react";
 
-// Logo do Elite Knifers: kukri de aço com chamas (inspirado na faca de referência do usuário).
-// "horizontal" = faca deitada (viewBox 122x44); "icone" = faca inclinada num quadrado 64x64.
+// Logo do Elite Knifers: kukri de aço com chamas, traçado sobre a faca de referência do usuário.
+// "horizontal" = faca deitada; "icone" = faca inclinada num quadrado 64x64.
+// O mesmo desenho está no favicon (src/app/icon.svg).
 
 export function LogoFaca({
   variante = "horizontal",
@@ -18,66 +19,70 @@ export function LogoFaca({
   const faca = (
     <>
       <defs>
-        <linearGradient id={`${id}aco`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#f2f4f6" />
-          <stop offset="0.5" stopColor="#bcc3cb" />
-          <stop offset="1" stopColor="#78818b" />
-        </linearGradient>
-        <linearGradient id={`${id}fogo`} x1="1" y1="0" x2="0" y2="0.4">
-          <stop offset="0" stopColor="#ffd84a" />
-          <stop offset="0.5" stopColor="#ff8a1f" />
-          <stop offset="1" stopColor="#ea4a0e" />
-        </linearGradient>
-        <linearGradient id={`${id}cabo`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#ffb640" />
-          <stop offset="1" stopColor="#d24a10" />
-        </linearGradient>
-        <clipPath id={`${id}lamina`}>
-          <path d={LAMINA} />
-        </clipPath>
+      <linearGradient id={`${id}aco`} x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stopColor="#e4e3df"/>
+      <stop offset="0.55" stopColor="#b9b9b5"/>
+      <stop offset="1" stopColor="#8d8f8e"/>
+      </linearGradient>
+      <linearGradient id={`${id}fogo`} x1="0" y1="0" x2="1" y2="0.3">
+      <stop offset="0" stopColor="#ff5a0a"/>
+      <stop offset="0.5" stopColor="#ff7d12"/>
+      <stop offset="1" stopColor="#ff9c1f"/>
+      </linearGradient>
+      <linearGradient id={`${id}cabo`} x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stopColor="#ffb23a"/>
+      <stop offset="0.6" stopColor="#f07a14"/>
+      <stop offset="1" stopColor="#c8500c"/>
+      </linearGradient>
+      <linearGradient id={`${id}couro`} x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stopColor="#6d4a33"/>
+      <stop offset="1" stopColor="#3f2819"/>
+      </linearGradient>
+      <clipPath id={`${id}lamina`}>
+      <path d="M420 141 C397 150 372 161 332 168 C292 174 232 162 172 162 C140 162 100 170 68 185 C110 213 170 246 236 253 C300 259 350 232 390 206 C405 198 416 195 430 194 Z"/>
+      </clipPath>
       </defs>
-      <path d={LAMINA} fill={`url(#${id}aco)`} stroke="#555d66" strokeWidth="0.9" strokeLinejoin="round" />
+      <path d="M420 141 C397 150 372 161 332 168 C292 174 232 162 172 162 C140 162 100 170 68 185 C110 213 170 246 236 253 C300 259 350 232 390 206 C405 198 416 195 430 194 Z"
+      fill={`url(#${id}aco)`} stroke="#5f6163" strokeWidth="2.2" strokeLinejoin="round"/>
       <g clipPath={`url(#${id}lamina)`} strokeLinejoin="round">
-        <path
-          d="M86 10 L86 25.2 C80 24.8 74 25.2 67 26.6 C70.5 24.6 72.5 23.6 74 23 C66 24 58 26.6 49.5 30.2 C55 26 58.6 24 61.4 22.8 C53 23.8 45.4 26 37 29.4 C43 24.6 47 22.4 51 20.8 C43 21.2 35 22.8 24.5 26.4 C33 20.4 41.5 17.6 50 15.4 L62 9 Z"
-          fill={`url(#${id}fogo)`}
-          stroke="#c7231a"
-          strokeWidth="1"
-        />
-        <path
-          d="M86 13.6 L86 21.6 C80 21.6 76 22 70.5 23 C73.5 21.4 75 20.8 76 20.4 C70 20.6 64 21.6 57 23.6 C62 20.6 66 19 70 18 C64 18 58 18.8 52 20 C58 17 64 15.6 70 14.8 Z"
-          fill="#ffe27a"
-          stroke="#ff9d2e"
-          strokeWidth="0.5"
-        />
+      <path d="M448 118 L448 192 C430 194 386 206 360 210 C376 202 384 201 378 197 C360 199 360 215 334 219 C350 211 358 205 352 201 C334 203 330 222 304 226 C320 218 332 207 326 203 C308 205 298 230 272 234 C288 226 304 207 298 203 C280 205 266 227 240 231 C256 223 276 204 270 200 C252 202 236 212 210 216 C226 208 248 198 242 194 C224 196 210 197 184 201 C200 193 220 190 214 186 C196 188 178 187 152 191 C168 183 192 180 186 176 L170 160 L170 118 Z"
+      fill={`url(#${id}fogo)`} stroke="#d8261a" strokeWidth="2.6"/>
+      <g fill="#ffb82e" opacity="0.9">
+      <path d="M440 150 L440 172 C422 174 394 186 368 190 C384 182 392 180 386 176 C368 178 362 194 336 198 C352 190 364 184 358 180 C340 182 330 202 304 206 C320 198 336 186 330 182 C312 184 298 206 272 210 C288 202 306 184 300 180 C282 182 266 200 240 204 C256 196 276 180 270 176 C252 178 238 186 212 190 C228 182 246 174 240 170 L230 166 L440 150 Z"/>
       </g>
-      <path d="M9 30.9 C20 34 32 35.6 43 34.2" fill="none" stroke="#fff" strokeOpacity="0.6" strokeWidth="0.8" strokeLinecap="round" />
-      <path
-        d="M78 14.6 C88 13.4 100 11.8 110 11 L112 10.4 L112 21.2 L110 20.6 C100 21.6 90 24.2 78 27 Z"
-        fill={`url(#${id}cabo)`}
-        stroke="#6b2a0a"
-        strokeWidth="0.9"
-        strokeLinejoin="round"
-      />
-      <g fill="#5a3a24" stroke="#2c1b10" strokeWidth="0.5" strokeLinejoin="round">
-        <path d="M80 14.4 L89 13.3 L89 24.6 L80 26.6 Z" />
-        <path d="M99 12.2 L105 11.6 L105 21.4 L99 22.4 Z" />
+      <g fill="none" stroke="#ffe27a" strokeWidth="1.6" opacity="0.85" strokeLinecap="round">
+      <path d="M430 160 C400 166 372 180 350 196"/>
+      <path d="M392 180 C360 188 330 204 310 218"/>
+      <path d="M330 186 C300 194 276 210 258 224"/>
+      <path d="M268 184 C244 190 222 200 206 210"/>
       </g>
-      <path d="M82.2 14.1 V26.1 M84.5 13.8 V25.6 M86.8 13.6 V25.1 M101 12 V22.1 M103 11.8 V21.8" stroke="#2c1b10" strokeWidth="0.6" />
-      <path d="M111 10.6 C116.4 9.4 119.8 12.6 119.4 16 C119.2 19.6 116.4 22.2 111 21 Z" fill="#4a3526" stroke="#2c1b10" strokeWidth="0.7" />
+      </g>
+      <path d="M80 188 C120 214 172 243 236 249 C292 254 340 232 382 206" fill="none" stroke="#ffffff" strokeOpacity="0.55" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M418 140 C450 134 490 131 522 136 C560 142 595 147 624 153 L622 181 C598 188 576 189 556 184 C532 178 508 171 486 178 C466 185 446 193 428 197 Z"
+      fill={`url(#${id}cabo)`} stroke="#6b2a0a" strokeWidth="2.2" strokeLinejoin="round"/>
+      <g fill="#8a3a0c" opacity="0.55">
+      <path d="M500 142 Q515 150 532 142 Q520 158 506 156 Z"/>
+      <path d="M598 156 Q608 162 618 158 Q612 172 602 170 Z"/>
+      </g>
+      <path d="M416 141 C438 136 462 133 487 133 L487 177 C468 183 448 191 430 198 Z" fill={`url(#${id}couro)`} stroke="#2a1a0f" strokeWidth="1.8" strokeLinejoin="round"/>
+      <path d="M548 141 L592 147 L592 188 C578 189 562 187 548 182 Z" fill={`url(#${id}couro)`} stroke="#2a1a0f" strokeWidth="1.8" strokeLinejoin="round"/>
+      <g stroke="#23150c" strokeWidth="1.6" opacity="0.85">
+      <path d="M425 139 L437 195 M434 137 L446 192 M443 136 L455 188 M452 135 L463 185 M461 134 L471 182 M470 133 L479 180 M479 133 L486 178"/>
+      <path d="M556 142 L558 184 M565 143 L566 186 M574 144 L575 187 M583 146 L584 188"/>
+      </g>
+      <path d="M612 151 C626 144 643 150 641 164 C640 174 632 180 629 190 C626 201 614 206 605 198 C612 190 613 180 613 170 Z"
+      fill="#4b3526" stroke="#241710" strokeWidth="2" strokeLinejoin="round"/>
+      <path d="M618 154 C628 151 636 155 636 162" fill="none" stroke="#7a5a44" strokeWidth="1.6" strokeLinecap="round"/>
     </>
   );
 
   return variante === "icone" ? (
     <svg viewBox="0 0 64 64" className={className} {...acessivel}>
-      <g transform="translate(32 33) rotate(-35) scale(0.5) translate(-62 -22)">{faca}</g>
+      <g transform="translate(32 33) rotate(-32) scale(0.106) translate(-355 -195)">{faca}</g>
     </svg>
   ) : (
-    <svg viewBox="0 0 122 44" className={className} {...acessivel}>
+    <svg viewBox="60 122 590 146" className={className} {...acessivel}>
       {faca}
     </svg>
   );
 }
-
-const LAMINA =
-  "M80 15.4 C70 14.8 62 14.6 54 16 C42 18 24 20.4 4 30.6 C18 34.2 32 36.6 44 35 C56 33.4 62 27.6 70 26.7 C74 26.3 77 26.5 80 26.5 Z";
