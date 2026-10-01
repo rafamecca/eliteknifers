@@ -9,7 +9,7 @@ export default async function LayoutAdmin({ children }: LayoutProps<"/admin">) {
   return (
     <>
       <p className="mb-2 text-xs font-semibold tracking-widest text-destaque-claro uppercase">Painel ADM</p>
-      <SubmenuAdmin />
+      <SubmenuAdmin mostrarTags={sessao.ehCoder} />
       {children}
     </>
   );

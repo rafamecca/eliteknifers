@@ -39,6 +39,7 @@ Só líder e sublíder mexem em resultados; qualquer jogador pode ter conta e ap
 | Sublíder | Tudo do jogador + enviar resultados e confirmar ou contestar resultados enviados contra o clã. |
 | Líder | Tudo do sublíder + editar perfil do clã (logo, bio, redes), aceitar e remover membros, nomear o sublíder. |
 | ADM | Aprovar ou rejeitar confrontos, resolver contestações, criar temporadas e campeonatos, cadastrar títulos, banir contas e editar qualquer dado. |
+| CODER | Tudo do ADM + gerenciar as tags de jogador. Por enquanto só o dono do site; é ligado direto no banco (não dá para virar CODER pelo site). |
 
 Um jogador pertence a no máximo um clã por vez. Cada troca de clã fica registrada no histórico do jogador.
 
@@ -53,6 +54,14 @@ Um jogador pertence a no máximo um clã por vez. Cada troca de clã fica regist
 
 - O ADM cadastra cada campeonato (nome, data, descrição) e as colocações dos clãs (1º, 2º, 3º…).
 - As colocações viram títulos no perfil do clã (Campeão, Vice, 3º lugar), junto com os títulos de campeão de temporada.
+
+### Tags de jogador
+
+- Selos estilo Discord (ex.: ADM, LENDA, CODER), com nome e cor, que aparecem ao lado do nick na lista de jogadores e nos membros do perfil do clã (no máximo 2, as mais importantes) e todas no perfil do jogador.
+- São só visuais: não dão permissão nenhuma.
+- O CODER cria, edita (nome, cor, ordem de importância), apaga e escolhe quem tem cada tag, numa aba "Tags" do Painel ADM que só aparece para ele.
+- Duas tags são automáticas: "ADM" vai para todo ADM e "CODER" para todo CODER. Elas podem mudar de nome e cor, mas não podem ser apagadas nem dadas à mão.
+- O texto da tag fica claro ou escuro conforme a cor, para continuar legível.
 
 ## Páginas do site
 
@@ -70,8 +79,8 @@ Navegação por menu lateral fixo (no celular vira menu recolhível), com botõe
 | Como funciona | Regras do @79, do envio de resultados e da pontuação. |
 | Enviar resultado | Formulário para líder e sublíder (ver fluxo abaixo). |
 | Minhas pendências | Resultados aguardando confirmação do clã e contestações abertas. |
-| Perfil do jogador | Nick, clã atual e histórico de clãs. Futuramente, estatísticas. |
-| Painel ADM | Fila de aprovação, contestações, temporadas, campeonatos, clãs, usuários e banimentos. |
+| Perfil do jogador | Nick, tags, clã atual e histórico de clãs. Futuramente, estatísticas. |
+| Painel ADM | Fila de aprovação, contestações, temporadas, campeonatos, clãs, usuários e banimentos. Aba Tags só para o CODER. |
 
 ## Fluxo de envio e aprovação
 
@@ -195,6 +204,7 @@ Onze tabelas cobrem tudo desta versão; a última já deixa pronto o espaço par
 | prints | id, confronto\_id, partida\_id (opcional), arquivo, hash, tipo (confronto ou partida) |
 | campeonatos e titulos | campeonato: id, nome, data, descricao · título: campeonato\_id, cla\_id, colocacao |
 | log\_admin | id, adm\_id, acao, alvo, antes, depois, data |
+| tags, usuarios\_tags, coders | tag: id, nome, cor, ordem, automatica (adm/coder) · quem tem: usuario\_id, tag\_id · coders: usuario\_id |
 | estatisticas\_jogador (futuro) | partida\_id, usuario\_id, cla\_id, frags, mortes, mvp |
 
 O Elo geral histórico pode ficar como uma coluna em clas ou numa "temporada" especial que nunca fecha. Os últimos 20 confrontos do perfil são só uma consulta com limite; nada é apagado.
@@ -260,6 +270,7 @@ Construir em quatro fases, cada uma testada com a comunidade antes da próxima. 
 4. **Fase 4 — Jogadores**
    - [ ] Estatísticas individuais (frags, mortes, MVP) a partir dos prints das partidas
    - [ ] Ranking de jogadores — por enquanto, lista dos jogadores com o clã ao lado do nome (ordem alfabética, busca e filtro por clã); a ordem por estatísticas vem junto com elas
+   - [x] Tags de jogador estilo Discord, gerenciadas pelo CODER
 
 ### Como usar com o Claude Code
 

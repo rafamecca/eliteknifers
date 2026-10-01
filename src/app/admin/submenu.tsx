@@ -10,11 +10,13 @@ const ABAS = [
   { href: "/admin/campeonatos", rotulo: "Campeonatos" },
 ];
 
-export function SubmenuAdmin() {
+/** A aba Tags só aparece para o CODER. */
+export function SubmenuAdmin({ mostrarTags }: { mostrarTags: boolean }) {
   const caminho = usePathname();
+  const abas = mostrarTags ? [...ABAS, { href: "/admin/tags", rotulo: "Tags" }] : ABAS;
   return (
     <nav className="mb-8 flex gap-1 overflow-x-auto border-b border-grafite-700">
-      {ABAS.map(({ href, rotulo }) => {
+      {abas.map(({ href, rotulo }) => {
         const ativo = href === "/admin" ? caminho === "/admin" : caminho.startsWith(href);
         return (
           <Link

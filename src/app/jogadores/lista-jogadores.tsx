@@ -4,9 +4,11 @@ import { Search } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { LogoCla } from "@/components/logo-cla";
-import { NOME_CARGO, type Cargo, type ClaResumo } from "@/lib/tipos";
+import { TagsJogador } from "@/components/tags-jogador";
+import { MAX_TAGS_AO_LADO } from "@/lib/tags";
+import { NOME_CARGO, type Cargo, type ClaResumo, type Tag } from "@/lib/tipos";
 
-export type JogadorLinha = { id: string; nick: string; cla: ClaResumo | null; cargo: Cargo | null };
+export type JogadorLinha = { id: string; nick: string; cla: ClaResumo | null; cargo: Cargo | null; tags: Tag[] };
 
 const SEM_CLA = "__sem_cla__";
 
@@ -59,9 +61,12 @@ export function ListaJogadores({ jogadores }: { jogadores: JogadorLinha[] }) {
         <ul className="cartao divide-y divide-grafite-800">
           {filtrados.map((j) => (
             <li key={j.id} className="flex items-center gap-3 px-4 py-2.5">
-              <Link href={`/jogadores/${encodeURIComponent(j.nick)}`} className="min-w-0 flex-1 truncate font-semibold hover:underline">
-                {j.nick}
-              </Link>
+              <span className="flex min-w-0 flex-1 items-center gap-2">
+                <Link href={`/jogadores/${encodeURIComponent(j.nick)}`} className="min-w-0 truncate font-semibold hover:underline">
+                  {j.nick}
+                </Link>
+                <TagsJogador tags={j.tags} max={MAX_TAGS_AO_LADO} />
+              </span>
               {j.cla ? (
                 <Link href={`/clas/${encodeURIComponent(j.cla.tag)}`} className="flex shrink-0 items-center gap-2 text-sm">
                   {j.cargo && j.cargo !== "membro" && (

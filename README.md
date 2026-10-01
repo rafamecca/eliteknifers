@@ -40,6 +40,7 @@ Quando uma parte nova precisar mudar o banco, rode o arquivo novo de `supabase/m
 | `20261002000000_fase2_temporadas.sql` | Encerrar temporada e abrir a próxima (com reset dos pontos) |
 | `20261003000000_fase3_comunidade.sql` | Campeonatos (apagar colocações) e gestão do clã pelo líder (pedidos de entrada, membros, sublíder, perfil) |
 | `20261004000000_limite_diario.sql` | Máximo de 3 confrontos valendo pontos por clã por dia |
+| `20261005000000_tags.sql` | Tags de jogador estilo Discord (aba Tags do Painel ADM, só para o CODER) |
 
 ### 2. Rodar no computador
 
@@ -57,6 +58,12 @@ Cadastre-se pelo site e confirme o e-mail. Depois, no **SQL Editor** do Supabase
 
 ```sql
 update usuarios set papel = 'adm' where nick = 'SEU_NICK';
+```
+
+Para gerenciar as tags de jogador (aba **Tags** do Painel ADM), também vire CODER — só dá pelo SQL Editor:
+
+```sql
+insert into coders (usuario_id) select id from usuarios where nick = 'SEU_NICK';
 ```
 
 Recarregue o site: o item **Painel ADM** aparece no menu. Por lá você cadastra os clãs e,

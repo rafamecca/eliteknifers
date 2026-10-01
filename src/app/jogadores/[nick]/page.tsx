@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LogoCla } from "@/components/logo-cla";
-import { garantir } from "@/lib/dados";
+import { TagsJogador } from "@/components/tags-jogador";
+import { garantir, obterTagsDosJogadores } from "@/lib/dados";
 import { formatarData } from "@/lib/formato";
 import { criarClienteServidor } from "@/lib/supabase/server";
 import { NOME_CARGO, type Cargo, type ClaResumo, type Usuario } from "@/lib/tipos";
@@ -30,14 +31,16 @@ export default async function PerfilJogador({ params }: PageProps<"/jogadores/[n
   const { supabase, usuario } = await buscarJogador((await params).nick);
   if (!usuario) notFound();
 
-  const historico = garantir(
-    await supabase
+  const [historico, tags] = await Promise.all([
+    supabase
       .from("membros_cla")
       .select("cargo, entrou_em, saiu_em, cla:clas(id, nome, tag, logo)")
       .eq("usuario_id", usuario.id)
       .order("entrou_em", { ascending: false })
-      .overrideTypes<Passagem[], { merge: false }>(),
-  );
+      .overrideTypes<Passagem[], { merge: false }>()
+      .then(garantir),
+    obterTagsDosJogadores(supabase, [usuario.id]),
+  ]);
   const atual = historico.find((h) => !h.saiu_em);
 
   return (
@@ -45,6 +48,11 @@ export default async function PerfilJogador({ params }: PageProps<"/jogadores/[n
       <header className="mb-8">
         <p className="text-xs font-semibold tracking-widest text-aco-400 uppercase">Jogador</p>
         <h1 className="font-display text-6xl leading-none tracking-wide">{usuario.nick}</h1>
+        {tags.has(usuario.id) && (
+          <div className="mt-3">
+            <TagsJogador tags={tags.get(usuario.id)} grande />
+          </div>
+        )}
         {usuario.banido && <p className="mt-1 text-sm text-derrota">Conta banida</p>}
       </header>
 

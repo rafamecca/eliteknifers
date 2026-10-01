@@ -6,6 +6,7 @@ import { BotaoCancelarPedido, BotaoPedirEntrada } from "@/app/meu-cla/forms";
 import { SeloTitulo } from "@/components/colocacao";
 import { ListaConfrontos } from "@/components/lista-confrontos";
 import { LogoCla } from "@/components/logo-cla";
+import { TagsJogador } from "@/components/tags-jogador";
 import { UltimosResultados } from "@/components/ultimos-resultados";
 import {
   garantir,
@@ -14,12 +15,14 @@ import {
   obterRankingGeral,
   obterTemporadaAtiva,
   obterTitulosDeCampeonato,
+  obterTagsDosJogadores,
   obterTitulosDeTemporada,
   obterUltimosConfrontos,
 } from "@/lib/dados";
 import { estatisticasDoCla } from "@/lib/estatisticas";
 import { PONTOS_INICIAIS } from "@/lib/elo";
 import { formatarDataCurta, formatarDia } from "@/lib/formato";
+import { MAX_TAGS_AO_LADO } from "@/lib/tags";
 import { obterSessao } from "@/lib/sessao";
 import { criarClienteServidor } from "@/lib/supabase/server";
 import { NOME_CARGO, type Cargo, type Cla, type ClaResumo } from "@/lib/tipos";
@@ -100,6 +103,7 @@ export default async function PerfilCla({ params, searchParams }: PageProps<"/cl
   const porId = new Map(garantir(clas).map((c) => [c.id, c]));
 
   const elenco = garantir(membros).sort((x, y) => ORDEM_CARGO[x.cargo] - ORDEM_CARGO[y.cargo] || x.usuario.nick.localeCompare(y.usuario.nick));
+  const tagsElenco = await obterTagsDosJogadores(supabase, elenco.map((m) => m.usuario.id));
   const redes = Object.entries(cla.redes ?? {}).filter(([, url]) => typeof url === "string" && url.startsWith("http")) as [
     keyof typeof NOME_REDE,
     string,
@@ -315,11 +319,14 @@ export default async function PerfilCla({ params, searchParams }: PageProps<"/cl
           ) : (
             <ul className="cartao divide-y divide-grafite-800">
               {elenco.map((m) => (
-                <li key={m.usuario.id} className="flex items-center justify-between px-4 py-2.5">
-                  <Link href={`/jogadores/${encodeURIComponent(m.usuario.nick)}`} className="font-medium hover:underline">
-                    {m.usuario.nick}
-                  </Link>
-                  <span className={`text-xs ${m.cargo === "membro" ? "text-aco-500" : "font-semibold text-destaque-claro"}`}>
+                <li key={m.usuario.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
+                  <span className="flex min-w-0 items-center gap-2">
+                    <Link href={`/jogadores/${encodeURIComponent(m.usuario.nick)}`} className="min-w-0 truncate font-medium hover:underline">
+                      {m.usuario.nick}
+                    </Link>
+                    <TagsJogador tags={tagsElenco.get(m.usuario.id)} max={MAX_TAGS_AO_LADO} />
+                  </span>
+                  <span className={`shrink-0 text-xs ${m.cargo === "membro" ? "text-aco-500" : "font-semibold text-destaque-claro"}`}>
                     {NOME_CARGO[m.cargo]}
                   </span>
                 </li>

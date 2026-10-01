@@ -39,6 +39,9 @@ resultados com prints, o ADM aprova e o ranking da temporada se atualiza.
 - [ ] Fase 4 — em andamento:
   - [x] `/jogadores`: lista dos jogadores com o clã ao lado (ordem alfabética, busca e filtro por
     clã) — decisão do usuário: por enquanto sem estatísticas
+  - [x] Tags de jogador estilo Discord: aba `/admin/tags` só para o CODER (tabela `coders`, ligada
+    só pelo banco); tags "ADM" e "CODER" automáticas; aparecem ao lado do nick (máx. 2) e todas no perfil
+  - [x] Limite de 3 confrontos valendo pontos por clã por dia
   - [ ] Estatísticas individuais (frags, mortes, MVP) e ranking por elas — regras a definir
     (proposta feita: cada clã digita os números dos seus jogadores a partir dos prints; MVP
     automático; ranking por K/D com mínimo de partidas). Tabela `estatisticas_jogador` já existe.
@@ -78,7 +81,7 @@ src/lib/tipos.ts       formato das linhas do banco (manter em sincronia com o SQ
 src/lib/supabase/      clientes servidor/navegador e urlPublica()
 src/components/        UI compartilhada (menu, pódio, tabela, lista de confrontos…)
 src/app/               rotas: / · /ranking · /clas · /clas/[tag][/confrontos] · /confrontos/[id] · /enviar · /pendencias · /como-funciona · /comparar
-                       /entrar · /cadastrar · /auth/confirm · /admin · /admin/clas[/novo|/[id]] · /admin/temporadas · /admin/campeonatos[/id]
+                       /entrar · /cadastrar · /auth/confirm · /admin · /admin/clas[/novo|/[id]] · /admin/temporadas · /admin/campeonatos[/id] · /admin/tags[/id]
                        /campeonatos[/id] · /meu-cla · /jogadores[/nick]
 ```
 
@@ -90,7 +93,11 @@ src/app/               rotas: / · /ranking · /clas · /clas/[tag][/confrontos]
   anula aprovado), `manter_confronto`, `corrigir_confronto`, `definir_lideranca`, `remover_membro` (ADM ou líder), `nova_temporada`, `pedir_entrada`,
   `cancelar_pedido`, `responder_pedido`, `sair_do_cla`, `nomear_sublider`, `editar_perfil_cla`.
   Auxiliares internas começam com `_` (`_aplicar_pontos`, `_conta_pontos`…) e não ficam expostas na API. Nunca abra `insert/update` direto nessas tabelas para usuários comuns.
-  Escritas simples do ADM (clãs, temporadas) usam RLS com `is_admin()`.
+  Escritas simples do ADM (clãs, temporadas) usam RLS com `is_admin()`; as das tags, com `is_coder()`.
+- **CODER** (`coders`) não tem política de escrita: só vira CODER pelo SQL Editor. Tags automáticas
+  (`tags.automatica` = `adm`/`coder`) não se apagam nem se dão à mão; quem tem cada tag sai da view
+  `tags_usuario` (manuais + automáticas). As consultas de tags (`obterTagsDosJogadores`) e o `ehCoder`
+  da sessão toleram a tabela ainda não existir.
 - **Confronto tem duas colunas de estado**: `status` = decisão do ADM (`pendente`/`aprovado`/`rejeitado`)
   e `resposta` = adversário (`aguardando`/`confirmado`/`contestado`). "Sem resposta" não é gravado:
   é `aguardando` com mais de 12h desde `enviado_em` (`src/lib/confronto.ts › estadoResposta`).

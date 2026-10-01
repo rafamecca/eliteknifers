@@ -83,3 +83,12 @@ export type CampeonatoComColocacoes = Campeonato & { colocacoes: Colocacao[] };
 export function nomeColocacao(colocacao: number): string {
   return colocacao === 1 ? "Campeão" : colocacao === 2 ? "Vice" : `${colocacao}º lugar`;
 }
+
+/** Tag de jogador estilo Discord (ESPECIFICACAO.md › Tags de jogador). `automatica`: dada pelo papel. */
+export type Tag = {
+  id: string;
+  nome: string;
+  cor: string;
+  ordem: number;
+  automatica: "adm" | "coder" | null;
+};

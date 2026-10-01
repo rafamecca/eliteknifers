@@ -4,7 +4,8 @@ import { PRAZO_RESPOSTA_HORAS } from "./confronto";
 import { historicoEloGeral, type ConfrontoParaElo } from "./elo";
 import type { ConfrontoEstat } from "./estatisticas";
 import { montarRanking, type ConfrontoResumo, type Ranking } from "./ranking";
-import type { Campeonato, CampeonatoComColocacoes, ClaResumo, ConfrontoComClas, Temporada } from "./tipos";
+import { ordenarTags } from "./tags";
+import type { Campeonato, CampeonatoComColocacoes, ClaResumo, ConfrontoComClas, Tag, Temporada } from "./tipos";
 
 export const SELECT_CONFRONTO = `id, data, enviado_em, status, resposta, contestacao_resolvida, partidas_a, partidas_b, conta_pontos, variacao, pontos_a_antes, pontos_b_antes,
   cla_a:clas!confrontos_cla_a_id_fkey(id, nome, tag, logo),
@@ -217,4 +218,60 @@ export async function obterTitulosDeCampeonato(
   return linhas.sort(
     (x, y) => x.colocacao - y.colocacao || (y.campeonato.data ?? "").localeCompare(x.campeonato.data ?? ""),
   );
+}
+
+// ---------------------------------------------------------------------------
+// Tags de jogador
+// ---------------------------------------------------------------------------
+
+/** Erro de tabela que ainda não existe (migração das tags não rodada): o site segue sem tags. */
+function semTabela(erro: { code?: string } | null): boolean {
+  return erro?.code === "PGRST205" || erro?.code === "42P01";
+}
+
+/** Todas as tags, da mais importante para a menos. */
+export async function obterTags(supabase: SupabaseClient): Promise<Tag[]> {
+  const resposta = await supabase.from("tags").select("id, nome, cor, ordem, automatica").overrideTypes<Tag[], { merge: false }>();
+  if (semTabela(resposta.error)) return [];
+  return ordenarTags(garantir(resposta));
+}
+
+/** Quem tem cada tag (manuais + automáticas), como pares usuário/tag. Sem `usuarios`, traz de todos. */
+export async function obterTagsUsuario(
+  supabase: SupabaseClient,
+  filtro: { usuarios?: string[]; tag?: string } = {},
+): Promise<{ usuario_id: string; tag_id: string }[]> {
+  if (filtro.usuarios?.length === 0) return [];
+  return buscarTodos((de, ate) => {
+    let consulta = supabase.from("tags_usuario").select("usuario_id, tag_id");
+    if (filtro.usuarios) consulta = consulta.in("usuario_id", filtro.usuarios);
+    if (filtro.tag) consulta = consulta.eq("tag_id", filtro.tag);
+    return consulta
+      .order("usuario_id")
+      .order("tag_id")
+      .range(de, ate)
+      .overrideTypes<{ usuario_id: string; tag_id: string }[], { merge: false }>();
+  });
+}
+
+/** Tags de cada jogador, já em ordem de importância. Sem `usuarios`, traz de todos. */
+export async function obterTagsDosJogadores(supabase: SupabaseClient, usuarios?: string[]): Promise<Map<string, Tag[]>> {
+  const porJogador = new Map<string, Tag[]>();
+  // As duas consultas em paralelo; sem tags (ou migração não rodada) o erro da segunda é ignorado.
+  const pedido = obterTagsUsuario(supabase, { usuarios }).then(
+    (linhas) => ({ linhas }),
+    (erro: unknown) => ({ erro }),
+  );
+  const tags = await obterTags(supabase);
+  if (tags.length === 0) return porJogador;
+  const resultado = await pedido;
+  if ("erro" in resultado) throw resultado.erro;
+  const { linhas } = resultado;
+  const porId = new Map(tags.map((t) => [t.id, t]));
+  for (const { usuario_id, tag_id } of linhas) {
+    const tag = porId.get(tag_id);
+    if (tag) porJogador.set(usuario_id, [...(porJogador.get(usuario_id) ?? []), tag]);
+  }
+  for (const [id, lista] of porJogador) porJogador.set(id, ordenarTags(lista));
+  return porJogador;
 }

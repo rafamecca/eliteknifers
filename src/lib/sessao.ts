@@ -8,6 +8,8 @@ export type Sessao = {
   cla: ClaResumo | null;
   cargo: Cargo | null;
   ehAdmin: boolean;
+  /** Gerencia as tags de jogador (tabela coders, ligada só pelo banco). */
+  ehCoder: boolean;
   /** Líder ou sublíder de um clã, sem banimento. */
   podeEnviar: boolean;
 };
@@ -22,7 +24,7 @@ export const obterSessao = cache(async (): Promise<Sessao | null> => {
   const uid = data?.claims?.sub;
   if (!uid) return null;
 
-  const [{ data: usuario }, { data: membro }] = await Promise.all([
+  const [{ data: usuario }, { data: membro }, { data: coder }] = await Promise.all([
     supabase.from("usuarios").select("id, nick, avatar, papel, banido").eq("id", uid).maybeSingle<Usuario>(),
     supabase
       .from("membros_cla")
@@ -30,6 +32,8 @@ export const obterSessao = cache(async (): Promise<Sessao | null> => {
       .eq("usuario_id", uid)
       .is("saiu_em", null)
       .maybeSingle<{ cargo: Cargo; cla: ClaResumo }>(),
+    // Antes da migração das tags a tabela não existe: o erro vira "não é CODER".
+    supabase.from("coders").select("usuario_id").eq("usuario_id", uid).maybeSingle<{ usuario_id: string }>(),
   ]);
   if (!usuario) return null;
 
@@ -39,6 +43,7 @@ export const obterSessao = cache(async (): Promise<Sessao | null> => {
     cla: membro?.cla ?? null,
     cargo,
     ehAdmin: usuario.papel === "adm" && !usuario.banido,
+    ehCoder: !!coder && !usuario.banido,
     podeEnviar: !usuario.banido && (cargo === "lider" || cargo === "sublider"),
   };
 });
