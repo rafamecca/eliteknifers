@@ -4,8 +4,15 @@ import { PartidasEPrints, PlacarConfronto } from "@/components/detalhe-confronto
 import { RespostaSelo, StatusConfrontoSelo } from "@/components/status-confronto";
 import { contestacaoAberta } from "@/lib/confronto";
 import { garantir, SELECT_CONFRONTO } from "@/lib/dados";
-import { MIN_PARTIDAS_PARA_PONTOS, PONTOS_INICIAIS, variacaoElo } from "@/lib/elo";
-import { diaEmBrasilia, formatarDataHora, formatarVariacao } from "@/lib/formato";
+import {
+  type ConfrontoQueContou,
+  MAX_CONFRONTOS_COM_PONTOS_POR_DIA,
+  MIN_PARTIDAS_PARA_PONTOS,
+  motivoSemPontos,
+  PONTOS_INICIAIS,
+  variacaoElo,
+} from "@/lib/elo";
+import { formatarDataHora, formatarVariacao } from "@/lib/formato";
 import { criarClienteServidor } from "@/lib/supabase/server";
 import type { ConfrontoComClas, Partida, Print } from "@/lib/tipos";
 import { AcoesConfronto } from "./acoes-confronto";
@@ -20,10 +27,6 @@ type Pendente = ConfrontoComClas & {
   partidas: Partida[];
   prints: Print[];
 };
-
-type JaContou = { cla_a_id: string; cla_b_id: string; data: string };
-
-const par = (a: string, b: string) => [a, b].sort().join("|");
 
 export default async function FilaAprovacao() {
   const supabase = await criarClienteServidor();
@@ -44,24 +47,27 @@ export default async function FilaAprovacao() {
 
   // Dados para a prévia de pontos (quem grava de verdade é o banco, na aprovação).
   const pontos = new Map<string, number>();
-  const jaContouNoDia = new Set<string>();
+  let contaram: ConfrontoQueContou[] = [];
   if (pendentes.length > 0) {
     const temporadas = [...new Set(pendentes.map((c) => c.temporada_id))];
     const desde = new Date(new Date(pendentes[0].data).getTime() - 36 * 3600_000).toISOString();
-    const [linhasPontos, contaram] = await Promise.all([
+    const [linhasPontos, jaContaram] = await Promise.all([
       supabase.from("pontos_temporada").select("cla_id, temporada_id, pontos").in("temporada_id", temporadas)
         .overrideTypes<{ cla_id: string; temporada_id: string; pontos: number }[], { merge: false }>(),
       supabase.from("confrontos").select("cla_a_id, cla_b_id, data").eq("status", "aprovado").eq("conta_pontos", true).gte("data", desde)
-        .overrideTypes<JaContou[], { merge: false }>(),
+        .overrideTypes<ConfrontoQueContou[], { merge: false }>(),
     ]);
     garantir(linhasPontos).forEach((p) => pontos.set(`${p.temporada_id}|${p.cla_id}`, p.pontos));
-    garantir(contaram).forEach((c) => jaContouNoDia.add(`${par(c.cla_a_id, c.cla_b_id)}|${diaEmBrasilia(c.data)}`));
+    contaram = garantir(jaContaram);
   }
 
   function previa(c: Pendente): string {
-    if (c.partidas_a + c.partidas_b < MIN_PARTIDAS_PARA_PONTOS) return `Não vale pontos: menos de ${MIN_PARTIDAS_PARA_PONTOS} partidas.`;
-    if (jaContouNoDia.has(`${par(c.cla_a.id, c.cla_b.id)}|${diaEmBrasilia(c.data)}`)) {
-      return "Não vale pontos: já houve um confronto aprovado que valeu pontos entre esses clãs neste dia.";
+    const sem = motivoSemPontos({ ...c, cla_a_id: c.cla_a.id, cla_b_id: c.cla_b.id }, contaram);
+    if (sem?.motivo === "partidas") return `Não vale pontos: menos de ${MIN_PARTIDAS_PARA_PONTOS} partidas.`;
+    if (sem?.motivo === "mesmo-par") return "Não vale pontos: já houve um confronto aprovado que valeu pontos entre esses clãs neste dia.";
+    if (sem?.motivo === "limite-diario") {
+      const tag = sem.claId === c.cla_a.id ? c.cla_a.tag : c.cla_b.tag;
+      return `Não vale pontos: ${tag} já tem ${MAX_CONFRONTOS_COM_PONTOS_POR_DIA} confrontos valendo pontos neste dia.`;
     }
     const ra = pontos.get(`${c.temporada_id}|${c.cla_a.id}`) ?? PONTOS_INICIAIS;
     const rb = pontos.get(`${c.temporada_id}|${c.cla_b.id}`) ?? PONTOS_INICIAIS;

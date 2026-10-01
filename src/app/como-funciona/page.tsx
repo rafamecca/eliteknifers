@@ -2,7 +2,15 @@ import { Ban, CircleCheck } from "lucide-react";
 import type { Metadata } from "next";
 import { CabecalhoPagina } from "@/components/cabecalho-pagina";
 import { MAX_PARTIDAS, PRAZO_RESPOSTA_HORAS } from "@/lib/confronto";
-import { K, MIN_CONFRONTOS_NO_RANKING, MIN_PARTIDAS_PARA_PONTOS, PONTOS_INICIAIS, multiplicadorMargem, variacaoElo } from "@/lib/elo";
+import {
+  K,
+  MAX_CONFRONTOS_COM_PONTOS_POR_DIA,
+  MIN_CONFRONTOS_NO_RANKING,
+  MIN_PARTIDAS_PARA_PONTOS,
+  multiplicadorMargem,
+  PONTOS_INICIAIS,
+  variacaoElo,
+} from "@/lib/elo";
 import { formatarVariacao } from "@/lib/formato";
 import { MODOS } from "@/lib/regras";
 
@@ -154,6 +162,12 @@ export default function ComoFunciona() {
           <li>
             Só o <strong>primeiro confronto do dia</strong> entre os mesmos dois clãs vale pontos. Os outros entram no histórico e
             nas estatísticas.
+          </li>
+          <li>
+            Cada clã tem no máximo <strong>{MAX_CONFRONTOS_COM_PONTOS_POR_DIA} confrontos valendo pontos por dia</strong>, somando
+            todos os adversários. Do 4º em diante o confronto conta na tabela (vitórias, empates e derrotas), no histórico e nas
+            estatísticas, mas não mexe nos pontos — nem do adversário. Isso evita que um clã “farme” pontos jogando o dia
+            inteiro.
           </li>
           <li>
             Empate só acontece quando um clã sai; o ADM decide se fica como empate ou como vitória do clã que ficou.

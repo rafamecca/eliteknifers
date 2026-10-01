@@ -39,6 +39,7 @@ Quando uma parte nova precisar mudar o banco, rode o arquivo novo de `supabase/m
 | `20261001000000_fase2_contestacao.sql` | Confirmação e contestação pelo adversário, correção de placar pelo ADM |
 | `20261002000000_fase2_temporadas.sql` | Encerrar temporada e abrir a próxima (com reset dos pontos) |
 | `20261003000000_fase3_comunidade.sql` | Campeonatos (apagar colocações) e gestão do clã pelo líder (pedidos de entrada, membros, sublíder, perfil) |
+| `20261004000000_limite_diario.sql` | Máximo de 3 confrontos valendo pontos por clã por dia |
 
 ### 2. Rodar no computador
 

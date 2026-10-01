@@ -2,10 +2,14 @@
 // Espelha public.calcular_variacao_elo (supabase/migrations). O banco é quem grava os
 // pontos na aprovação; aqui serve para prévias na tela. Mudou um, mude o outro.
 
+import { diaEmBrasilia } from "./formato";
+
 export const PONTOS_INICIAIS = 1000;
 export const K = 32;
 export const MIN_PARTIDAS_PARA_PONTOS = 3;
 export const MIN_CONFRONTOS_NO_RANKING = 3;
+/** Cada clã: no máximo 3 confrontos valendo pontos por dia (horário de Brasília). */
+export const MAX_CONFRONTOS_COM_PONTOS_POR_DIA = 3;
 
 /** Chance esperada de A vencer B. */
 export function chanceEsperada(pontosA: number, pontosB: number): number {
@@ -72,4 +76,28 @@ export function historicoEloGeral(confrontos: ConfrontoParaElo[]): { pontos: Map
 
 export function calcularEloGeral(confrontos: ConfrontoParaElo[]): Map<string, number> {
   return historicoEloGeral(confrontos).pontos;
+}
+
+export type ConfrontoQueContou = { cla_a_id: string; cla_b_id: string; data: string };
+
+export type SemPontos =
+  | { motivo: "partidas" }
+  | { motivo: "mesmo-par" }
+  | { motivo: "limite-diario"; claId: string };
+
+/** Por que o confronto não valeria pontos se fosse aprovado agora (null = vale). `contaram` são os
+ *  aprovados que valeram pontos (sem o próprio). Espelha public._conta_pontos. */
+export function motivoSemPontos(
+  c: ConfrontoQueContou & { partidas_a: number; partidas_b: number },
+  contaram: ConfrontoQueContou[],
+): SemPontos | null {
+  if (c.partidas_a + c.partidas_b < MIN_PARTIDAS_PARA_PONTOS) return { motivo: "partidas" };
+  const dia = diaEmBrasilia(c.data);
+  const doDia = contaram.filter((o) => diaEmBrasilia(o.data) === dia);
+  const joga = (o: ConfrontoQueContou, cla: string) => o.cla_a_id === cla || o.cla_b_id === cla;
+  if (doDia.some((o) => joga(o, c.cla_a_id) && joga(o, c.cla_b_id))) return { motivo: "mesmo-par" };
+  for (const cla of [c.cla_a_id, c.cla_b_id]) {
+    if (doDia.filter((o) => joga(o, cla)).length >= MAX_CONFRONTOS_COM_PONTOS_POR_DIA) return { motivo: "limite-diario", claId: cla };
+  }
+  return null;
 }

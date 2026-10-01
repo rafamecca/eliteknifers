@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { calcularEloGeral, chanceEsperada, historicoEloGeral, multiplicadorMargem, pontosNaNovaTemporada, variacaoElo } from "./elo";
+import {
+  calcularEloGeral,
+  chanceEsperada,
+  historicoEloGeral,
+  MAX_CONFRONTOS_COM_PONTOS_POR_DIA,
+  motivoSemPontos,
+  multiplicadorMargem,
+  pontosNaNovaTemporada,
+  variacaoElo,
+} from "./elo";
 
 describe("variacaoElo — exemplos da especificação", () => {
   it.each([
@@ -69,5 +78,32 @@ describe("calcularEloGeral", () => {
     ]);
     expect(pico.get("a")).toBe(1021);
     expect(pico.get("b")).toBeGreaterThan(1000);
+  });
+});
+
+describe("motivoSemPontos — espelha public._conta_pontos", () => {
+  const jogo = (a: string, b: string, data: string, pa = 3, pb = 0) => ({ cla_a_id: a, cla_b_id: b, data, partidas_a: pa, partidas_b: pb });
+
+  it("menos de 3 partidas", () => {
+    expect(motivoSemPontos(jogo("a", "b", "2026-10-01T15:00:00-03:00", 2, 0), [])).toEqual({ motivo: "partidas" });
+  });
+
+  it("só o primeiro do dia entre o mesmo par (em qualquer ordem dos clãs)", () => {
+    const contaram = [jogo("b", "a", "2026-10-01T10:00:00-03:00")];
+    expect(motivoSemPontos(jogo("a", "b", "2026-10-01T23:59:00-03:00"), contaram)).toEqual({ motivo: "mesmo-par" });
+    expect(motivoSemPontos(jogo("a", "b", "2026-10-02T00:01:00-03:00"), contaram)).toBeNull();
+  });
+
+  it("no máximo 3 por clã por dia, contando como A ou como B", () => {
+    const contaram = [
+      jogo("a", "b", "2026-10-01T10:00:00-03:00"),
+      jogo("c", "a", "2026-10-01T11:00:00-03:00"),
+      jogo("a", "d", "2026-10-01T23:30:00-03:00"), // 02:30 UTC do dia 2, mas dia 1 em Brasília
+    ];
+    expect(motivoSemPontos(jogo("e", "a", "2026-10-01T18:00:00-03:00"), contaram)).toEqual({ motivo: "limite-diario", claId: "a" });
+    expect(motivoSemPontos(jogo("a", "e", "2026-10-01T18:00:00-03:00"), contaram)).toEqual({ motivo: "limite-diario", claId: "a" });
+    expect(motivoSemPontos(jogo("e", "f", "2026-10-01T18:00:00-03:00"), contaram)).toBeNull();
+    expect(motivoSemPontos(jogo("a", "e", "2026-10-02T09:00:00-03:00"), contaram)).toBeNull();
+    expect(MAX_CONFRONTOS_COM_PONTOS_POR_DIA).toBe(3);
   });
 });

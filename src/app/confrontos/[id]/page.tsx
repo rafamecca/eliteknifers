@@ -97,7 +97,10 @@ export default async function PaginaConfronto({ params }: PageProps<"/confrontos
                 {c.pontos_b_antes - c.variacao}
               </>
             ) : (
-              <>Não valeu pontos (menos de 3 partidas ou não foi o primeiro confronto do dia entre os dois clãs). Conta nas estatísticas.</>
+              <>
+                Não valeu pontos (menos de 3 partidas, não foi o primeiro confronto do dia entre os dois clãs ou um deles já
+                tinha 3 confrontos valendo pontos no dia). Conta nas estatísticas.
+              </>
             )}
           </p>
         )}

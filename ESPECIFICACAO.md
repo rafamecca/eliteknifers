@@ -154,6 +154,8 @@ Depois, a variação de pontos de A (B recebe o mesmo valor com sinal invertido)
 
 - Um confronto precisa de pelo menos 3 partidas para contar pontos.
 - Só o primeiro confronto do dia entre os mesmos dois clãs conta pontos. Os demais entram no histórico e nas estatísticas.
+- Cada clã tem no máximo 3 confrontos valendo pontos por dia (somando todos os adversários). Como o ponto que um ganha o outro perde, o confronto só vale pontos se os dois clãs ainda estiverem abaixo do limite. A partir do 4º, entra só no histórico, nas estatísticas e no V/E/D da tabela, sem mexer nos pontos.
+- O dia é o do horário de Brasília e a ordem é a de aprovação. Anular um confronto que valeu pontos não faz outro do mesmo dia passar a valer.
 - Empate só acontece quando um clã sai; o ADM decide se registra como empate ou como vitória do clã que ficou.
 - Para aparecer no ranking da temporada, o clã precisa de 3 confrontos aprovados nela.
 - Desempate: pontos, depois aproveitamento de confrontos, depois saldo de partidas.

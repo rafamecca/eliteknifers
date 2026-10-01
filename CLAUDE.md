@@ -119,6 +119,10 @@ src/app/               rotas: / · /ranking · /clas · /clas/[tag][/confrontos]
 - "Mesmo confronto" (envio duplicado): par de clãs com resultado pendente a até 2h do horário informado.
 - "Primeiro confronto do dia": dia no horário de Brasília; decidido na ordem de aprovação
   (vale o primeiro aprovado que contou pontos). A fila do ADM é ordenada pela data do confronto.
+- Limite diário: no máximo 3 confrontos com pontos por clã por dia (`MAX_CONFRONTOS_COM_PONTOS_POR_DIA`),
+  além da regra do par. Vale só se os dois clãs estão abaixo do limite. A regra mora em `public._conta_pontos`
+  (migração `20261004000000_limite_diario.sql`), espelhada em `src/lib/elo.ts › motivoSemPontos` (prévia
+  do ADM). Confronto sem pontos continua no V/E/D da tabela (decisão do usuário).
 - Rounds são obrigatórios; uma partida válida tem um lado com 9 e o outro de 0 a 8. Máx. 15 partidas.
 - Print repetido: bloqueado se o mesmo hash estiver em resultado não rejeitado (reenvio após
   rejeição pode reusar o print).
